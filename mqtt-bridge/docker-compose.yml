@@ -5,24 +5,27 @@ networks:
     external: true
 
 services:
-  simulator:
-    image: aictrobotics/turtlebot3:latest
-    container_name: simulator
+  mqtt-bridge:
+    image: aictrobotics/mqtt-bridge:latest
+    container_name: mqtt-bridge
     # depends_on:
     #   - ros-master
     networks: 
       bridge-network: 
-        ipv4_address: 192.168.56.5
+        ipv4_address: 192.168.56.4
+    # ports:
+    #   - "1883:1883"
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.5"
+      - "ROS_HOSTNAME=192.168.56.4"
       - "DISPLAY=unix$DISPLAY"
     # network_mode: "host"
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-    command: >      
-      bash -c "source ~/catkin_ws/devel/setup.bash &&
-      export TURTLEBOT3_MODEL=waffle &&
-      roslaunch turtlebot3_gazebo turtlebot3_world.launch"
+    # command: >      
+    #   bash -c "source ~/catkin_ws/devel/setup.bash &&
+    #   roslaunch mqtt_bridge demo.launch"
+    command: >
+      bash -c "tail -F anything"
     privileged: true
     restart: always

@@ -45,13 +45,15 @@ RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
 # Install Prerequisites for mqtt-bridge
 RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
     apt install -y ros-noetic-rosbridge-library &&\
-    apt install -y mosquitto mosquitto-clients &&\
-    pip3 install inject"    
+    apt install -y mosquitto mosquitto-clients"    
 
 # Install mqtt-bridge
 RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
     cd ~/catkin_ws/src &&\
     git clone https://github.com/groove-x/mqtt_bridge.git &&\
+    cd mqtt_bridge &&\
+    pip install --upgrade pip &&\
+    pip3 install -r dev-requirements.txt &&\
     cd ~/catkin_ws &&\
     catkin_make &&\
     source devel/setup.bash"  
