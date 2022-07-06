@@ -28,7 +28,7 @@ RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
 # Install mqtt-bridge
 RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
     cd ~/catkin_ws/src &&\
-    git clone https://github.com/groove-x/mqtt_bridge.git &&\
+    git clone https://github.com/suho0515/mqtt_bridge.git &&\
     cd ~/catkin_ws &&\
     catkin_make &&\
     source devel/setup.bash"  
