@@ -1,0 +1,11 @@
+version: '2.2'
+
+services:
+  foxglove:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: foxglove
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always
+
