@@ -43,12 +43,12 @@ services:
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
       - "ROS_HOSTNAME=192.168.56.4"
-      # - "DISPLAY=unix$DISPLAY"
+      - "DISPLAY=unix$DISPLAY"
       # network_mode: "host"
-      # volumes: 
-      # - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command: >
-      bash -c "source ~/catkin_ws/devel/setup.bash && export TURTLEBOT3_MODEL=waffle && roslaunch turtlebot3_gazebo turtlebot3_world.launch"
+      bash -c "source ~/catkin_ws/devel/setup.bash && export TURTLEBOT3_MODEL=waffle_pi && roslaunch turtlebot3_gazebo turtlebot3_world.launch"
     privileged: true
     restart: always
 
