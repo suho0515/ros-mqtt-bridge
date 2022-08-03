@@ -37,7 +37,7 @@ RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
 # Install turtlebot3 simulator packages
 RUN /bin/bash -c "source /opt/ros/noetic/setup.bash &&\
     cd ~/catkin_ws/src &&\
-    git clone -b noetic-devel https://github.com/ROBOTIS-GIT/turtlebot3_simulations.git &&\
+    git clone -b noetic-devel https://github.com/suho0515/turtlebot3_simulations.git &&\
     cd ~/catkin_ws &&\
     catkin_make &&\
     source devel/setup.bash"
