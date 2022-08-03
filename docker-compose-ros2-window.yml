@@ -5,6 +5,7 @@ networks:
     external: true
 
 services:
+
   # ros-master:
   #   image: ros:noetic-ros-core
   #   container_name: ros-master
@@ -86,6 +87,6 @@ services:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
       - "ROS_HOSTNAME=192.168.56.5"
     ports:
-      - "8080:8080"
+      - "172.30.1.50:8081:8080" # you should port forwarding with ip of your computer. and if it's not working, change port of local.
     privileged: true
     restart: always
