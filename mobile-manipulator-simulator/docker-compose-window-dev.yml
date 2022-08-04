@@ -1,0 +1,38 @@
+version: '2.2'
+
+networks:
+  pcp-bridge-network:
+    external: true
+
+services:
+  ros-master:
+    image: ros:melodic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.2"
+    restart: always
+
+  simulator:
+    image: aictrobotics/mobile-manipulator-simulator:latest
+    container_name: simulator
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.3
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.3"
+      - "DISPLAY=host.docker.internal:0.0"
+      - "LIBGL_ALWAYS_INDIRECT=0"
+    volumes: 
+      - C:\github\mobile_manipulator_simulator:/root/catkin_ws/src/mobile_manipulator_simulator
+    command: >
+      bash -c "tail -F anything"
+    privileged: true
+    restart: always
