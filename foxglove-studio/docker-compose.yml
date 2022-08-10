@@ -1,0 +1,14 @@
+version: '2.2'
+
+services:
+  foxglove:
+    # image: ghcr.io/foxglove/studio:latest
+    image: aictrobotics/foxglove-studio/latest
+    container_name: foxglove
+    ports:
+      - "172.30.1.19:8081:8080" # you should port forwarding with ip of your computer. and if it's not working, change port of local.
+    # volumes: 
+    #   - C:\github\studio-extension-pcp:/home/studio-extension-pcp
+    #   - C:\github\studio-extension-pcp/foxglove-studio/extension:/root/.foxglove-studio/extension
+    privileged: true
+    restart: always

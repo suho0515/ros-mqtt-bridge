@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
+    <meta name="generator" content="Hugo 0.84.0">
+    <title>Starter Template 쨌 Bootstrap v5.0</title>
+
+    <link rel="canonical" href="https://getbootstrap.com/docs/5.0/examples/starter-template/">
+    
+
+    <!-- Bootstrap core CSS -->
+    <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+
+  <!-- ROS Related -->
+  <head>
+    <meta charset="utf-8" />
+    
+    <script type="text/javascript" src="http://static.robotwebtools.org/EventEmitter2/current/eventemitter2.min.js"></script>
+    <script type="text/javascript" src="http://static.robotwebtools.org/roslibjs/current/roslib.min.js"></script>
+    
+    <script type="text/javascript" type="text/javascript">
+      // Connecting to ROS
+      var ros = new ROSLIB.Ros({
+        url : 'ws://localhost:9090'
+      });
+    
+      ros.on('connection', function() {
+        console.log('Connected to websocket server.');
+      });
+    
+      ros.on('error', function(error) {
+        console.log('Error connecting to websocket server: ', error);
+      });
+    
+      ros.on('close', function() {
+        console.log('Connection to websocket server closed.');
+      });
+    
+      // Subscribing to a Topic
+      var listener = new ROSLIB.Topic({
+        ros : ros,
+        name : '/listener',
+        messageType : 'std_msgs/String'
+      });
+    
+      listener.subscribe(function(message) {
+        console.log('Received message on ' + listener.name + ': ' + message.data);
+        listener.unsubscribe();
+      });
+    </script>
+  </head>
+    
+  <body>
+    <h1>WIMS(Web-based Integrated Management System)</h1>
+    <h2>made by Suho Kim of AICT.</h2>
+  </body>
+</html>
+

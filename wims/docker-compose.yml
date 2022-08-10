@@ -1,0 +1,65 @@
+version: '2.2'
+
+networks:
+  pcp-bridge-network:
+    external: true
+
+services:
+  ros-master:
+    image: ros:noetic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.2"
+    restart: always
+
+  rosbridge-suite:
+    image: aictrobotics/wims:latest
+    container_name: rosbridge-suite
+    command: >
+      bash -c "roslaunch rosbridge_server rosbridge_websocket.launch"
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.3
+    ports:
+      - "9090:9090"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.3"
+    restart: always
+
+  # wims:
+  #   image: aictrobotics/wims:latest
+  #   container_name: wims
+  #   command: >
+  #     bash -c "cd somewhere"
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.3
+  #   ports:
+  #     - "9090:9090"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.3"
+  #   restart: always
+
+  dev-container:
+    image: aictrobotics/wims:latest
+    container_name: dev-container
+    command: >
+      bash -c "tail -F anything"
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.4
+    ports:
+      - "8000:8000"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+    volumes:
+      - C:\github\pcp:/root/catkin_ws/src/pcp
+    restart: always
