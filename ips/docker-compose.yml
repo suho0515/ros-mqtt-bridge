@@ -1,0 +1,66 @@
+version: '2.2'
+
+networks:
+  bridge-network:
+    external: true
+
+services:
+  ros-master:
+    image: ros:noetic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks: 
+      bridge-network: 
+        ipv4_address: 192.168.56.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.2"
+    restart: always
+
+  ips-driver:
+    restart: always
+    image: aictrobotics/ips:latest
+    networks: 
+      bridge-network: 
+        ipv4_address: 192.168.56.3
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.3"
+      - "DISPLAY=unix$DISPLAY"
+    volumes:
+      - /dev/serial/by-id:/dev/serial/by-id
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    privileged: true
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch uwb_tracking_ros uwb_tracking_dwm1001.launch"
+    # command: >
+    #   bash -c "tail -F anything"
+    
+  rosbridge-suite:
+    image: aictrobotics/rosbridge-suite:latest
+    container_name: rosbridge-suite
+    command: >
+      bash -c "roslaunch rosbridge_server rosbridge_websocket.launch"
+    networks:
+      bridge-network:
+        ipv4_address: 192.168.56.4
+    ports:
+      - "9090:9090"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+    restart: always
+
+  web-server:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: web-server
+    networks:
+      bridge-network:
+        ipv4_address: 192.168.56.5
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.5"
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always
