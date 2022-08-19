@@ -1,0 +1,34 @@
+version: '2.2'
+
+networks:
+  bridge-network:
+    external: true
+
+services:
+  mqtt-web:
+    image: hivemq/hivemq4
+    container_name: mqtt-web
+    # depends_on:
+    #   - ros-master
+    networks: 
+      bridge-network: 
+        ipv4_address: 192.168.56.6
+    # links:
+    #   - mosquitto
+    ports:
+      - "1883:1883"
+      - "8080:8080"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.6"
+      - "DISPLAY=unix$DISPLAY"
+    # network_mode: "host"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    # command: >      
+    #   bash -c "source ~/catkin_ws/devel/setup.bash &&
+    #   roslaunch mqtt_bridge aict_demo.launch"
+    # command: >
+    #   bash -c "tail -F anything"
+    privileged: true
+    restart: always
