@@ -1,0 +1,52 @@
+version: '2.2'
+
+networks:
+  pcp-bridge-network:
+    external: true
+
+services:
+  ros-master:
+    image: ros:melodic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.2"
+    restart: always
+
+  joy-driver:
+    image: aictrobotics/joy-to-cmd-converter:latest
+    container_name: joy-driver
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.3
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch joy dual_joy.launch"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.3"
+    privileged: true
+    restart: always
+
+  joy-to-cmd-converter:
+    image: aictrobotics/joy-to-cmd-converter:latest
+    container_name: joy-to-cmd-converter
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.4
+    command: >
+      bash -c "tail -F anything"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+    volumes: 
+      - ~/github/pcp/joy-to-cmd-converter:/root/catkin_ws/src/joy-to-cmd-converter
+    privileged: true
+    restart: always
