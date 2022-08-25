@@ -31,10 +31,10 @@ services:
       - /dev/serial/by-id:/dev/serial/by-id
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     privileged: true
-    command: >
-      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch uwb_tracking_ros uwb_tracking_dwm1001.launch"
     # command: >
-    #   bash -c "tail -F anything"
+    #   bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch uwb_tracking_ros uwb_tracking_dwm1001.launch"
+    command: >
+      bash -c "tail -F anything"
     
   rosbridge-suite:
     image: aictrobotics/rosbridge-suite:latest
