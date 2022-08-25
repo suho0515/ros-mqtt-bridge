@@ -1,0 +1,131 @@
+version: '2.2'
+
+networks:
+  pcp-bridge-network:
+    external: true
+
+services:
+  ros-master:
+    image: ros:noetic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.2"
+    restart: always
+
+  rosbridge-suite:
+    image: aictrobotics/rosbridge-suite:latest
+    container_name: rosbridge-suite
+    depends_on:
+      - ros-master
+    command: >
+      bash -c "roslaunch rosbridge_server rosbridge_websocket.launch"
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.3
+    ports:
+      - "9090:9090"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.3"
+    restart: always
+
+  foxglove-studio:
+    image: aictrobotics/mir-driver:latest
+    container_name: foxglove-studio
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.4
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+    command: >
+      bash -c "cd ~/studio && yarn web:serve"
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always
+
+  mir-simulator:
+    image: aictrobotics/mir-driver:latest
+    container_name: mir-simulator
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.5
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.5"
+      - "DISPLAY=unix$DISPLAY"
+      # network_mode: "host"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_gazebo mir_maze_world.launch"
+    privileged: true
+    restart: always
+
+  mir-localization:
+    image: aictrobotics/mir-driver:latest
+    container_name: mir-localization
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.6
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.6"
+      - "DISPLAY=unix$DISPLAY"
+      # network_mode: "host"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_navigation amcl.launch initial_pose_x:=10.0 initial_pose_y:=10.0"
+    privileged: true
+    restart: always
+
+  mir-navigation:
+    image: aictrobotics/mir-driver:latest
+    container_name: mir-navigation
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.7
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.7"
+      - "DISPLAY=unix$DISPLAY"
+      # network_mode: "host"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_navigation start_planner.launch map_file:=/root/catkin_ws/src/mir_robot/mir_gazebo/maps/maze.yaml virtual_walls_map_file:=/root/catkin_ws/src/mir_robot/mir_gazebo/maps/maze_virtual_walls.yaml"
+    privileged: true
+    restart: always
+
+  mir-rviz:
+    image: aictrobotics/mir-driver:latest
+    container_name: mir-rviz
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.8
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.8"
+      - "DISPLAY=unix$DISPLAY"
+      # network_mode: "host"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && rviz -d /root/catkin_ws/src/mir_robot/mir_navigation/rviz/navigation.rviz"
+    privileged: true
+    restart: always
