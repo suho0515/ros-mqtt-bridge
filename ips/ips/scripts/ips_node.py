@@ -4,11 +4,13 @@ import sys
 import paho.mqtt.client as mqtt
 import geometry_msgs.msg 
 import json
-from geometry_msgs.msg import Pose, PoseStamped, PoseArray, Quaternion
+from geometry_msgs.msg import PoseStamped, Quaternion
 from tf.transformations import quaternion_from_euler 
 
 class IPS:
     def __init__(self):
+        ip_address = rospy.get_param('/ips_node/ip_address')
+        port = rospy.get_param('/ips_node/port')
 
         self.node_dict_list = []
         self.p_list = []
@@ -20,7 +22,7 @@ class IPS:
         self.client.on_subscribe = self.on_subscribe
         self.client.on_message = self.on_message
 
-        self.client.connect('192.168.1.59', 1883)
+        self.client.connect(ip_address, port)
 
         self.client.subscribe('#', 1)
         self.client.loop_forever()

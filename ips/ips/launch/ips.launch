@@ -1,0 +1,11 @@
+<launch>
+
+    <arg name="ip_address" default="192.168.1.59" />
+    <arg name="port" default="1883" />
+
+    <node name="ips_node" pkg="ips" type="ips_node.py" output="screen" clear_params="true">
+        <param name="ip_address" value="$(arg ip_address)" /> 
+        <param name="port" value="$(arg port)" /> 
+    </node>
+
+</launch>
