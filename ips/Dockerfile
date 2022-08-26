@@ -20,3 +20,12 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
 # Install preliminaries
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     pip install paho-mqtt"
+
+# Install ips package
+RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
+    git clone https://github.com/suho0515/pcp &&\
+    cp -r /pcp/ips/ips ~/catkin_ws/src &&\
+    rm -rf pcp &&\
+    cd ~/catkin_ws &&\
+    catkin_make &&\
+    source devel/setup.bash"
