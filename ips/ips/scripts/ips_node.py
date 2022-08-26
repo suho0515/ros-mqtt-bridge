@@ -9,8 +9,8 @@ from tf.transformations import quaternion_from_euler
 
 class IPS:
     def __init__(self):
-        ip_address = rospy.get_param('/ips_node/ip_address')
-        port = rospy.get_param('/ips_node/port')
+        self.ip_address = rospy.get_param('/ips_node/ip_address')
+        self.port = rospy.get_param('/ips_node/port')
 
         self.node_dict_list = []
         self.p_list = []
@@ -22,13 +22,15 @@ class IPS:
         self.client.on_subscribe = self.on_subscribe
         self.client.on_message = self.on_message
 
-        self.client.connect(ip_address, port)
-
-        self.client.subscribe('#', 1)
+        self.client.connect(self.ip_address, self.port)
+        # self.client.subscribe('#', 1)
         self.client.loop_forever()
 
     def on_connect(self, client, userdata, flags, rc):
         if rc == 0:
+            # to reconnect to mqtt broker even if the connection is broken.
+            # run the subscriber in on_connect handler
+            self.client.subscribe('#', 1)
             print("connected OK")
         else:
             print("Bad connection Returned code=", rc)
@@ -57,8 +59,8 @@ class IPS:
 
         self.position_publisher(self.node_dict_list)
         
-        #print(self.node_dict_list)
-        #print('\n')
+        # print(self.node_dict_list)
+        # print('\n')
 
     def config_msg_to_dict(self, topic, payload):
         

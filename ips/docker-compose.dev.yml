@@ -34,3 +34,32 @@ services:
       - ~/github/pcp/ips:/root/catkin_ws/src/ips
     privileged: true
     restart: always
+
+  rosbridge-suite:
+    image: aictrobotics/rosbridge-suite:latest
+    container_name: rosbridge-suite
+    command: >
+      bash -c "roslaunch rosbridge_server rosbridge_websocket.launch"
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.4
+    ports:
+      - "9090:9090"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+    restart: always
+
+  foxglove-studio:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: foxglove-studio
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.5
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.5"
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always
