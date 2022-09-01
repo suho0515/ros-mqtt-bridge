@@ -45,13 +45,13 @@ class IPS:
 
 
     def on_message(self, client, userdata, msg):
-        #print(str(msg.topic.decode("utf-8")))
-        #print(str(msg.payload.decode("utf-8")))
+        # print(str(msg.topic.decode("utf-8")))
+        # print(str(msg.payload.decode("utf-8")))
         self.message_processor(str(msg.topic.decode("utf-8")), msg.payload)
 
     def message_processor(self, topic, payload):
         if 'config' in topic:
-            self.node_dict_list.append(self.config_msg_to_dict(topic, payload))
+            self.node_dict_list = self.config_msg_to_dict(self.node_dict_list, topic, payload)
         elif 'status' in topic:
             self.node_dict_list = self.status_msg_to_dict(self.node_dict_list, topic, payload)
         elif 'location' in topic:
@@ -62,8 +62,8 @@ class IPS:
         # print(self.node_dict_list)
         # print('\n')
 
-    def config_msg_to_dict(self, topic, payload):
-        
+    def config_msg_to_dict(self, node_dict_list, topic, payload):
+
         node_dict = {}
 
         topic_list = topic.split('/')
@@ -73,7 +73,11 @@ class IPS:
         label = str(pl_dict['configuration']['label'].decode("utf-8"))
         nodeType = str(pl_dict['configuration']['nodeType'].decode("utf-8"))
 
-        if nodeType=="ANCHOR":
+        for i in range(len(node_dict_list)):
+            if node_dict_list[i]['id']==id:
+                return node_dict_list
+
+        if (nodeType=="ANCHOR"):
             # initiator = str(pl_dict['configuration']['anchor']['initiator'].decode("utf-8"))
             
             x = pl_dict['configuration']['anchor']['position']['x']
@@ -91,7 +95,10 @@ class IPS:
         else:
             node_dict = {'id': id, 'label': label, 'nodeType': nodeType}
 
-        return node_dict
+        node_dict_list.append(node_dict)
+
+
+        return node_dict_list
                 
     def status_msg_to_dict(self, node_dict_list, topic, payload):
         
@@ -102,13 +109,19 @@ class IPS:
         status = pl_dict['present']
 
         for i in range(len(node_dict_list)):
-            if node_dict_list[i]['id']==id:
-                node_dict_list[i]['status'] = status
+            if 'status' in node_dict_list[i]:
+                return node_dict_list
+            else:
+                if node_dict_list[i]['id']==id:
+                    node_dict_list[i]['status'] = status
 
         return node_dict_list
 
     def location_msg_to_dict(self, node_dict_list, topic, payload):
         
+        if bool(payload) == False:
+            return node_dict_list
+
         topic_list = topic.split('/')
         id = topic_list[2]
 
@@ -118,6 +131,8 @@ class IPS:
         z = pl_dict['position']['z']
         quality = pl_dict['position']['quality']
 
+
+
         for i in range(len(node_dict_list)):
             if node_dict_list[i]['id']==id:
                 node_dict_list[i]['position'] = {'x': 0.0, 'y': 0.0, 'z': 0.0, 'quality': 0}
@@ -125,6 +140,13 @@ class IPS:
                 node_dict_list[i]['position']['y'] = y
                 node_dict_list[i]['position']['z'] = z
                 node_dict_list[i]['position']['quality'] = quality
+
+                if (isinstance(node_dict_list[i]['position']['x'], float) == False) \
+                    or (isinstance(node_dict_list[i]['position']['y'], float) == False) \
+                    or (isinstance(node_dict_list[i]['position']['z'], float) == False):
+                    
+                    node_dict_list[i].pop('position', None)
+
 
         return node_dict_list
 
