@@ -61,3 +61,21 @@ services:
       - "8080:8080"
     privileged: true
     restart: always
+
+  pose-estimator:
+    image: aictrobotics/ips:latest
+    container_name: pose-estimator
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.6
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ips pose_estimator.launch"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.6"
+    volumes: 
+      - ~/github/pcp/ips:/root/catkin_ws/src/ips
+    privileged: true
+    restart: always

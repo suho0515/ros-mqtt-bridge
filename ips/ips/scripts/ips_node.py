@@ -2,10 +2,10 @@
 import rospy
 import sys
 import paho.mqtt.client as mqtt
-import geometry_msgs.msg 
 import json
 from geometry_msgs.msg import PoseStamped, Quaternion
 from tf.transformations import quaternion_from_euler 
+from std_msgs.msg import Int16
 
 class IPS:
     def __init__(self):
@@ -58,6 +58,7 @@ class IPS:
             self.node_dict_list = self.location_msg_to_dict(self.node_dict_list, topic, payload)
 
         self.position_publisher(self.node_dict_list)
+        self.quality_publisher(self.node_dict_list)
         
         # print(self.node_dict_list)
         # print('\n')
@@ -170,6 +171,20 @@ class IPS:
                 p_pub = rospy.Publisher(str_name, PoseStamped, queue_size=10)
 
                 p_pub.publish(p)
+
+    def quality_publisher(self, node_dict_list):
+        
+        q = Int16()
+
+        for i in range(len(node_dict_list)):
+            if 'position' in node_dict_list[i]:
+
+                q.data = node_dict_list[i]['position']['quality']  
+
+                str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/quality"
+                q_pub = rospy.Publisher(str_name, Int16, queue_size=10)
+
+                q_pub.publish(q)
 
 def main(args):
   rospy.init_node('ips', anonymous=True)

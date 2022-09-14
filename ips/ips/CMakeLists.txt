@@ -15,6 +15,6 @@ catkin_package(
 #  DEPENDS system_lib
 )
 
-catkin_install_python(PROGRAMS scripts/ips_node.py
+catkin_install_python(PROGRAMS scripts/ips_node.py scripts/pose_estimator_node.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
