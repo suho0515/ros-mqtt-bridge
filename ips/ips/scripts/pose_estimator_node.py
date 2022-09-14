@@ -173,7 +173,7 @@ class POSE_ESTIMATOR:
         marker.color.r = 1.0
         marker.color.g = 1.0
         marker.color.b = 1.0
-        marker.color.a = 0.5
+        marker.color.a = 0.7
 
         # Set the pose of the marker
         marker.pose.position.x = p.position.x + 5.0
@@ -248,7 +248,8 @@ class POSE_ESTIMATOR:
                     + "quality: " \
                     + str(q) + "%\n" \
                     + "\n" \
-                    + "azimuth: " + str(round(a,2)) + '\xb0'
+                    + "azimuth: " + str(round(a,2)) + '\xb0\n' \
+                    + "(before applying offset)"
         marker.text = str_text
 
         str_name = "dual_pose_marker"
