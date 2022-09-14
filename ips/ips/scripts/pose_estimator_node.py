@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import rospy
 import sys
 import paho.mqtt.client as mqtt
@@ -182,13 +184,71 @@ class POSE_ESTIMATOR:
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
 
+        px = format(p.position.x, '.3f')
+        py = format(p.position.y, '.3f')
+        pz = format(p.position.z, '.3f')
+        ox = format(p.orientation.x, '.3f')
+        oy = format(p.orientation.y, '.3f')
+        oz = format(p.orientation.z, '.3f')
+        ow = format(p.orientation.w, '.3f')
+
+        str_px = ""
+        str_py = ""
+        str_pz = ""
+        str_ox = ""
+        str_oy = ""
+        str_oz = ""
+        str_ow = ""
+        if px >= 0.0:
+            str_px = '+' + str(px)
+        else:
+            str_px = '-' + str(px)
+
+        if py >= 0.0:
+            str_py = '+' + str(py)
+        else:
+            str_py = '-' + str(py)
+
+        if pz >= 0.0:
+            str_pz = '+' + str(pz)
+        else:
+            str_pz = '-' + str(pz)
+
+        if ox >= 0.0:
+            str_ox = '+' + str(ox)
+        else:
+            str_ox = '-' + str(ox)
+
+        if oy >= 0.0:
+            str_oy = '+' + str(oy)
+        else:
+            str_oy = '-' + str(oy)
+
+        if oz >= 0.0:
+            str_oz = '+' + str(oz)
+        else:
+            str_oz = '-' + str(oz)
+
+        if ow >= 0.0:
+            str_ow = '+' + str(ow)
+        else:
+            str_ow = '-' + str(ow)
+
         # set text
-        str_text = "dual_pose:\n" \
-                    + str(p) + "\n" \
-                    "quality: " \
-                    + str(q) + "\n" \
-                    "azimuth: " \
-                    + str(a)
+        str_text = "virtual tag pose:\n" \
+                    + "position[m]:\n" \
+                    + "  x: " + str_px + "\n" \
+                    + "  y: " + str_py + "\n" \
+                    + "  z: " + str_pz + "\n" \
+                    + "quaternion:\n" \
+                    + "  x: " + str_ox + "\n" \
+                    + "  y: " + str_oy + "\n" \
+                    + "  z: " + str_oz + "\n" \
+                    + "  w: " + str_ow + "\n" \
+                    + "quality: " \
+                    + str(q) + "%\n" \
+                    + "\n" \
+                    + "azimuth: " + str(round(a,2)) + '\xb0'
         marker.text = str_text
 
         str_name = "dual_pose_marker"
