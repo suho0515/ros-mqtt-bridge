@@ -9,10 +9,17 @@ from tf.transformations import quaternion_from_euler
 import message_filters
 import math
 from tf.transformations import quaternion_from_euler
-from std_msgs.msg import Int16
+from std_msgs.msg import Int16, Float64
+from visualization_msgs.msg import Marker
 
 class POSE_ESTIMATOR:
     def __init__(self):
+
+        self.p = Pose()
+        self.q = Quaternion()
+        self.quality = 0
+        self.a = Float64()
+
         self.dual_tag_left = rospy.get_param('/pose_estimator_node/dual_tag_left')
         self.dual_tag_right = rospy.get_param('/pose_estimator_node/dual_tag_right')
 
@@ -93,7 +100,11 @@ class POSE_ESTIMATOR:
 
         z = (lz+rz)/2.0
 
-        print(theta)
+        self.a = theta
+
+        self.azimuth_publisher(self.a)
+
+        #print(theta)
         #print(x)
         #print(y)
 
@@ -101,19 +112,19 @@ class POSE_ESTIMATOR:
         #print(theta)
         #print("\n")
 
-        q = quaternion_from_euler(0.0, 0.0, theta)
+        self.q = quaternion_from_euler(0.0, 0.0, theta)
         #print(q)
 
-        p = Pose()
-        p.position.x = x
-        p.position.y = y
-        p.position.z = z
-        p.orientation.x = q[0]
-        p.orientation.y = q[1]
-        p.orientation.z = q[2]
-        p.orientation.w = q[3]
+        self.p.position.x = x
+        self.p.position.y = y
+        self.p.position.z = z
+        self.p.orientation.x = self.q[0]
+        self.p.orientation.y = self.q[1]
+        self.p.orientation.z = self.q[2]
+        self.p.orientation.w = self.q[3]
 
-        self.pose_publisher(p)
+        self.pose_publisher(self.p)
+        self.marker_publisher(self.p,self.quality,self.a)
 
     def pose_publisher(self, p):
         
@@ -129,6 +140,62 @@ class POSE_ESTIMATOR:
 
         p_pub.publish(ps)
 
+    def azimuth_publisher(self, a):
+        
+        a_msg = Float64()
+
+        a_msg.data = a
+        
+        str_name = "dual_pose_azimuth"
+        a_pub = rospy.Publisher(str_name, Float64, queue_size=10)
+
+        a_pub.publish(a_msg)
+
+    def marker_publisher(self, p, q, a):
+        
+        marker = Marker()
+
+        marker.header.frame_id = "/map"
+        marker.header.stamp = rospy.Time.now()
+        
+        # set shape, Arrow: 0; Cube: 1 ; Sphere: 2 ; Cylinder: 3
+        marker.type = 9
+        marker.id = 0
+
+        # Set the scale of the marker
+        marker.scale.x = 0.5
+        marker.scale.y = 0.5
+        marker.scale.z = 0.5
+
+        # Set the color
+        marker.color.r = 1.0
+        marker.color.g = 1.0
+        marker.color.b = 1.0
+        marker.color.a = 0.5
+
+        # Set the pose of the marker
+        marker.pose.position.x = p.position.x + 5.0
+        marker.pose.position.y = p.position.y + 5.0
+        marker.pose.position.z = p.position.z
+        marker.pose.orientation.x = 0.0
+        marker.pose.orientation.y = 0.0
+        marker.pose.orientation.z = 0.0
+        marker.pose.orientation.w = 1.0
+
+        # set text
+        str_text = "dual_pose:\n" \
+                    + str(p) + "\n" \
+                    "quality: " \
+                    + str(q) + "\n" \
+                    "azimuth: " \
+                    + str(a)
+        marker.text = str_text
+
+        str_name = "dual_pose_marker"
+        m_pub = rospy.Publisher(str_name, Marker, queue_size=10)
+
+        m_pub.publish(marker)
+
     def calculate_quality(self, left_tag_quality, right_tag_quality):
         quality = 0
         if left_tag_quality > right_tag_quality:
@@ -137,7 +204,8 @@ class POSE_ESTIMATOR:
             quality = left_tag_quality
 
         #print(quality)
-        self.quality_publisher(quality)
+        self.quality = quality
+        self.quality_publisher(self.quality)
 
     def quality_publisher(self, q):
         
