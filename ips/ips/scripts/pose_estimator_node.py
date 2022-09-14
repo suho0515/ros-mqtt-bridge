@@ -184,13 +184,13 @@ class POSE_ESTIMATOR:
         marker.pose.orientation.z = 0.0
         marker.pose.orientation.w = 1.0
 
-        px = format(p.position.x, '.3f')
-        py = format(p.position.y, '.3f')
-        pz = format(p.position.z, '.3f')
-        ox = format(p.orientation.x, '.3f')
-        oy = format(p.orientation.y, '.3f')
-        oz = format(p.orientation.z, '.3f')
-        ow = format(p.orientation.w, '.3f')
+        px = float(p.position.x)
+        py = float(p.position.y)
+        pz = float(p.position.z)
+        ox = float(p.orientation.x)
+        oy = float(p.orientation.y)
+        oz = float(p.orientation.z)
+        ow = float(p.orientation.w)
 
         str_px = ""
         str_py = ""
@@ -200,39 +200,45 @@ class POSE_ESTIMATOR:
         str_oz = ""
         str_ow = ""
         if px >= 0.0:
-            str_px = '+' + str(px)
+            str_px = '+' + format(px, '.3f')
         else:
-            str_px = '-' + str(px)
+            str_px = format(px, '.3f')
 
         if py >= 0.0:
-            str_py = '+' + str(py)
+            str_py = '+' + format(py, '.3f')
         else:
-            str_py = '-' + str(py)
+            str_py = format(py, '.3f')
 
         if pz >= 0.0:
-            str_pz = '+' + str(pz)
+            str_pz = '+' + format(pz, '.3f')
         else:
-            str_pz = '-' + str(pz)
+            str_pz = format(pz, '.3f')
 
         if ox >= 0.0:
-            str_ox = '+' + str(ox)
+            if ox == -0.0:
+                str_ox = "+0.000"
+            else:
+                str_ox = format(ox, '.3f')
         else:
-            str_ox = '-' + str(ox)
+            str_ox = format(ox, '.3f')
 
         if oy >= 0.0:
-            str_oy = '+' + str(oy)
+            if oy == -0.0:
+                str_oy = "+0.000"
+            else:
+                str_oy = format(oy, '.3f')
         else:
-            str_oy = '-' + str(oy)
+            str_oy = format(oy, '.3f')
 
         if oz >= 0.0:
-            str_oz = '+' + str(oz)
+            str_oz = '+' + format(oz, '.3f')
         else:
-            str_oz = '-' + str(oz)
+            str_oz = format(oz, '.3f')
 
         if ow >= 0.0:
-            str_ow = '+' + str(ow)
+            str_ow = '+' + format(ow, '.3f')
         else:
-            str_ow = '-' + str(ow)
+            str_ow = format(ow, '.3f')
 
         # set text
         str_text = "virtual tag pose:\n" \
