@@ -52,7 +52,6 @@ services:
     privileged: true
     restart: always
 
-
   # mobile-base-simulator:
   #   image: aictrobotics/mobile-manipulator:latest
   #   container_name: mobile-base-simulator
