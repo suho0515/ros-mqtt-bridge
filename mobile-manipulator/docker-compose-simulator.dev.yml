@@ -17,25 +17,6 @@ services:
       - "ROS_HOSTNAME=192.168.56.2"
     restart: always
 
-  mobile-base-simulator:
-    image: aictrobotics/mobile-manipulator:latest
-    container_name: mobile-base-simulator
-    depends_on:
-      - ros-master
-    networks:
-      pcp-bridge-network:
-        ipv4_address: 192.168.56.3
-    environment:
-      - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.3"
-      - "DISPLAY=unix$DISPLAY"
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-    command: >
-      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_gazebo mir_maze_world.launch"
-    privileged: true
-    restart: always
-
   joy-driver:
     image: aictrobotics/mobile-manipulator:latest
     container_name: joy-driver
@@ -43,14 +24,53 @@ services:
       - ros-master
     networks:
       pcp-bridge-network:
-        ipv4_address: 192.168.56.4
+        ipv4_address: 192.168.56.3
     command: >
       bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch joy dual_joy.launch"
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.4"
+      - "ROS_HOSTNAME=192.168.56.3"
     privileged: true
     restart: always
+
+  manipulator-simulator:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: manipulator-simulator
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.4
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+      - "DISPLAY=unix$DISPLAY"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ur_gazebo ur3e_bringup.launch controllers:="joint_state_controller joint_group_vel_controller""
+    privileged: true
+    restart: always
+
+
+  # mobile-base-simulator:
+  #   image: aictrobotics/mobile-manipulator:latest
+  #   container_name: mobile-base-simulator
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.5
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.5"
+  #     - "DISPLAY=unix$DISPLAY"
+  #   volumes: 
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_gazebo mir_maze_world.launch"
+  #   privileged: true
+  #   restart: always
 
   dev-container:
     image: aictrobotics/mobile-manipulator:latest
@@ -59,10 +79,10 @@ services:
       - ros-master
     networks:
       pcp-bridge-network:
-        ipv4_address: 192.168.56.5
+        ipv4_address: 192.168.56.6
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.5"
+      - "ROS_HOSTNAME=192.168.56.6"
       - "DISPLAY=unix$DISPLAY"
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
