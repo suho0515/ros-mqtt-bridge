@@ -33,6 +33,7 @@ ALL_CONTROLLERS = [
         "pos_joint_traj_controller",
         "scaled_vel_joint_traj_controller",
         "vel_joint_traj_controller",
+        "joint_group_pos_controller",
         "joint_group_vel_controller",
         "forward_joint_traj_controller",
         "forward_cartesian_traj_controller",
@@ -69,9 +70,9 @@ class MANIPULATOR:
             '/ur_hardware_interface/set_mode', SetModeAction)
         try:
             self.set_mode_client.wait_for_server(timeout)
-            print("set mode action client is on")
+            rospy.loginfo("set mode action client is on")
         except rospy.exceptions.ROSException as err:
-            print(
+            rospy.logerr(
                 "Could not reach set_mode action. Make sure that the driver is actually running."
                 " Msg: {}".format(err))
 
@@ -79,9 +80,9 @@ class MANIPULATOR:
                 SwitchController)
         try:
             self.switch_controllers_client.wait_for_service(timeout)
-            print("controller switch service is on")
+            rospy.loginfo("controller switch service is on")
         except rospy.exceptions.ROSException as err:
-            print(
+            rospy.logerr(
                 "Could not reach controller switch service. Make sure that the driver is actually running."
                 " Msg: {}".format(err))
         
@@ -99,10 +100,10 @@ class MANIPULATOR:
         # resp = self.s_playProgram()
         # rospy.sleep(0.5)
 
-        self.switch_on_controller("joint_group_pos_controller")
+        self.switch_on_controller("joint_group_vel_controller")
         rospy.sleep(0.5)
 
-        self.pub = rospy.Publisher('/joint_group_pos_controller/command',
+        self.pub = rospy.Publisher('/joint_group_vel_controller/command',
                                    Float64MultiArray, queue_size=10)
         self.joint_vel_msg = Float64MultiArray()
         self.joint_vel_msg.data = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
@@ -139,7 +140,7 @@ class MANIPULATOR:
         srv.start_controllers = [controller_name]
         srv.strictness = SwitchControllerRequest.BEST_EFFORT
         result = self.switch_controllers_client(srv)
-        print(result)
+        rospy.loginfo("switch_on_controller result is %s",result)
 
     def set_torque(self, val):
         pass

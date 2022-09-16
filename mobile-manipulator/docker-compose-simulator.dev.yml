@@ -66,7 +66,7 @@ services:
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command: >
-      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ur_gazebo ur3e_bringup.launch controllers:="joint_state_controller joint_group_vel_controller""
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ur_gazebo ur3e_vel_bringup.launch"
     privileged: true
     restart: always
 
