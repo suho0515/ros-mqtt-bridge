@@ -33,6 +33,24 @@ services:
     privileged: true
     restart: always
 
+  joy-to-mm:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: joy-to-mm
+    depends_on:
+      - ros-master
+      - joy-driver
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.4
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && rosrun joy_to_mm joy_to_mm_node.py"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.4"
+    privileged: true
+    restart: always
+
+
   manipulator-simulator:
     image: aictrobotics/mobile-manipulator:latest
     container_name: manipulator-simulator
@@ -40,10 +58,10 @@ services:
       - ros-master
     networks:
       pcp-bridge-network:
-        ipv4_address: 192.168.56.4
+        ipv4_address: 192.168.56.5
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.4"
+      - "ROS_HOSTNAME=192.168.56.5"
       - "DISPLAY=unix$DISPLAY"
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -59,10 +77,10 @@ services:
   #     - ros-master
   #   networks:
   #     pcp-bridge-network:
-  #       ipv4_address: 192.168.56.5
+  #       ipv4_address: 192.168.56.6
   #   environment:
   #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
-  #     - "ROS_HOSTNAME=192.168.56.5"
+  #     - "ROS_HOSTNAME=192.168.56.6"
   #     - "DISPLAY=unix$DISPLAY"
   #   volumes: 
   #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
@@ -78,10 +96,10 @@ services:
       - ros-master
     networks:
       pcp-bridge-network:
-        ipv4_address: 192.168.56.6
+        ipv4_address: 192.168.56.7
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.6"
+      - "ROS_HOSTNAME=192.168.56.7"
       - "DISPLAY=unix$DISPLAY"
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw

@@ -33,7 +33,7 @@ ALL_CONTROLLERS = [
         "pos_joint_traj_controller",
         "scaled_vel_joint_traj_controller",
         "vel_joint_traj_controller",
-        "joint_group_pos_controller",
+        "joint_group_vel_controller",
         "forward_joint_traj_controller",
         "forward_cartesian_traj_controller",
         "twist_controller",
@@ -108,8 +108,17 @@ class MANIPULATOR:
         self.joint_vel_msg.data = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
 
         self.r = rospy.Rate(10)
-
         pass
+
+    def set_power(self, power_mode):
+        print(power_mode)
+        if power_mode is 'OFF':            
+            self.set_robot_to_mode(RobotMode.POWER_OFF)
+            rospy.loginfo("Manipulator power is off.")
+        elif power_mode is 'ON':            
+            self.set_robot_to_mode(RobotMode.POWER_ON)
+            rospy.loginfo("Manipulator power is on.")
+            
 
     def set_robot_to_mode(self, target_mode):
         goal = SetModeGoal()
@@ -131,10 +140,6 @@ class MANIPULATOR:
         srv.strictness = SwitchControllerRequest.BEST_EFFORT
         result = self.switch_controllers_client(srv)
         print(result)
-
-
-    def set_power(self, val):
-        pass
 
     def set_torque(self, val):
         pass
@@ -159,7 +164,7 @@ class MANIPULATOR:
             self.joint_vel_msg.data[4] = v4
         if v5 is not None:
             self.joint_vel_msg.data[5] = v5
-        print(self.joint_vel_msg)
+        #print(self.joint_vel_msg)
         self.pub.publish(self.joint_vel_msg)
         #self.r.sleep()
         pass

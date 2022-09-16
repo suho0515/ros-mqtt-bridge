@@ -79,10 +79,20 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     catkin_make -DCMAKE_BUILD_TYPE=RelWithDebugInfo &&\
     source devel/setup.bash"
 
+# Mobile Manipulator Package
+# ========================================
+RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
+    git clone https://github.com/suho0515/pcp &&\
+    cp -r /pcp/mobile-manipulator ~/catkin_ws/src &&\
+    rm -rf pcp &&\
+    cd ~/catkin_ws &&\
+    catkin_make &&\
+    source devel/setup.bash"
+
 # Documentation
 # ========================================
 # Install Python Package for Documentation
-RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
-    pip install Sphinx &&\
-    pip install sphinx_rtd_theme &&\
-    apt-get install -y ros-melodic-rosdoc-lite"
+# RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
+#     pip install Sphinx &&\
+#     pip install sphinx_rtd_theme &&\
+#     apt-get install -y ros-melodic-rosdoc-lite"
