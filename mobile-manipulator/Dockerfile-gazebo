@@ -39,10 +39,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
 
 # UR Driver
 # ========================================
-# Install Preliminaries
-RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
-    pip install scipy"
-
 # Install UR Robot Driver
 RUN /bin/bash -c "apt-get update &&\
     source /opt/ros/melodic/setup.bash &&\

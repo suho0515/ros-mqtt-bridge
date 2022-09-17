@@ -1,22 +1,49 @@
 #!/usr/bin/python
 #-*- coding: utf-8 -*-
+
+# rospy for use ros with python
 import rospy
 
+# actionlib for Connect with ROS Action Server
 import actionlib
+
+# ur dashboard messages to use with ros service or ros action
 from ur_dashboard_msgs.msg import SetModeAction, \
                                     SetModeGoal, \
                                     RobotMode
+
+# ur dashboard service messages to require service to ur controller
 from ur_dashboard_msgs.srv import GetRobotMode, \
                                     GetProgramState, \
                                     GetLoadedProgram, \
                                     GetSafetyMode, \
                                     Load
+
+# controller manager service messages to choose controller for ur robot
 from controller_manager_msgs.srv import SwitchControllerRequest, \
-                                        SwitchController
+                                        SwitchController, \
+                                        LoadControllerRequest, \
+                                        LoadController
+
+# cartesian control messages to control ur robot in cartesian coordinate
+from cartesian_control_msgs.msg import FollowCartesianTrajectoryAction, \
+                                        FollowCartesianTrajectoryGoal, \
+                                        FollowCartesianTrajectoryResult, \
+                                        CartesianTrajectoryPoint
+
+# Trigger Module for standard service
 from std_srvs.srv import Trigger
-import std_msgs.msg
-from std_msgs.msg import Bool
-from std_msgs.msg import Float64MultiArray
+
+# standard messages for various purpose (e.g. String)
+from std_msgs.msg import String, Float64MultiArray
+
+# TFMessage module of tf2 messages, tf means transformation
+# It used to get information of end-effector pose 
+from tf2_msgs.msg import TFMessage
+
+# Rotation module of scipy package
+# It used for convert quaternion to euler or euler to quaternion
+from scipy.spatial.transform import Rotation
 
 # If your robot description is created with a tf_prefix, those would have to be adapted
 JOINT_NAMES = [
@@ -29,95 +56,145 @@ JOINT_NAMES = [
 ]
 
 ALL_CONTROLLERS = [
-        "scaled_pos_joint_traj_controller",
-        "pos_joint_traj_controller",
-        "scaled_vel_joint_traj_controller",
-        "vel_joint_traj_controller",
-        "joint_group_pos_controller",
-        "joint_group_vel_controller",
-        "forward_joint_traj_controller",
-        "forward_cartesian_traj_controller",
-        "twist_controller",
-        "pose_based_cartesian_traj_controller",
-        "joint_based_cartesian_traj_controller",
-        ]
+    "scaled_pos_joint_traj_controller",
+    "pos_joint_traj_controller",
+    "scaled_vel_joint_traj_controller",
+    "vel_joint_traj_controller",
+    "joint_group_pos_controller",
+    "joint_group_vel_controller",
+    "forward_joint_traj_controller",
+    "forward_cartesian_traj_controller",
+    "twist_controller",
+    "pose_based_cartesian_traj_controller",
+    "joint_based_cartesian_traj_controller",
+]
 
 class MANIPULATOR:
     def __init__(self):
-        self.s_getRobotMode = rospy.ServiceProxy('/ur_hardware_interface/dashboard/get_robot_mode', GetRobotMode)
-        self.s_getProgramState = rospy.ServiceProxy('/ur_hardware_interface/dashboard/program_state', GetProgramState)
-        self.s_getLoadedProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/get_loaded_program', GetLoadedProgram)
-        self.s_getSafetyMode = rospy.ServiceProxy('/ur_hardware_interface/dashboard/get_safety_mode', GetSafetyMode)
-        
-        self.s_playProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/play', Trigger)
-        self.s_stopProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/stop', Trigger)
-        self.s_connectToDashboardServer = rospy.ServiceProxy('/ur_hardware_interface/dashboard/connect', Trigger)
-        self.s_quitFromDashboardServer = rospy.ServiceProxy('/ur_hardware_interface/dashboard/quit', Trigger)
-        self.s_loadProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/load_program', Load)
-        
+        # Class Variables Initialization
+        # ========================================
+        # timeout for wait any server it connect
         timeout = rospy.Duration(30)
 
-        self.set_mode_client = actionlib.SimpleActionClient('/ur_hardware_interface/set_mode', SetModeAction)
-        self.switch_controllers_client = rospy.ServiceProxy('/controller_manager/switch_controller',  SwitchController)
-        
-        self.script_publisher = rospy.Publisher("/ur_hardware_interface/script_command", std_msgs.msg.String, queue_size=1)
-        self.pub = rospy.Publisher('/joint_group_vel_controller/command', Float64MultiArray, queue_size=10)
-        
+        # Joint velocity control message
         self.joint_vel_msg = Float64MultiArray()
         self.joint_vel_msg.data = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+
+
+
+        # ROS Service Initialization
+        # ========================================
+        # Get Current Robot Mode
+        self.s_getRobotMode = rospy.ServiceProxy('/ur_hardware_interface/dashboard/get_robot_mode', GetRobotMode)
+        # Get Current Program State
+        self.s_getProgramState = rospy.ServiceProxy('/ur_hardware_interface/dashboard/program_state', GetProgramState)
+        # Get Current Loaded Program
+        self.s_getLoadedProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/get_loaded_program', GetLoadedProgram)
+        # Get Current Safety Mode State
+        self.s_getSafetyMode = rospy.ServiceProxy('/ur_hardware_interface/dashboard/get_safety_mode', GetSafetyMode)
         
+        # Connect to Dashboard Server
+        self.s_connectToDashboardServer = rospy.ServiceProxy('/ur_hardware_interface/dashboard/connect', Trigger)
+        # Quit from Dashboard Server
+        self.s_quitFromDashboardServer = rospy.ServiceProxy('/ur_hardware_interface/dashboard/quit', Trigger)
+        # Load Program
+        self.s_loadProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/load_program', Load)
+        # Play Program
+        self.s_playProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/play', Trigger)
+        # Stop Program
+        self.s_stopProgram = rospy.ServiceProxy('/ur_hardware_interface/dashboard/stop', Trigger)
+
+
+        
+        # ROS Action Initialization
+        # ========================================
+        # Connect to Set Mode Action Server from Client
         self.set_mode_client = actionlib.SimpleActionClient(
             '/ur_hardware_interface/set_mode', SetModeAction)
         try:
             self.set_mode_client.wait_for_server(timeout)
-            rospy.loginfo("set mode action client is on")
+            print("set mode action client is on")
         except rospy.exceptions.ROSException as err:
-            rospy.logerr(
+            print(
                 "Could not reach set_mode action. Make sure that the driver is actually running."
                 " Msg: {}".format(err))
-
+            
+        # Connect to Load Controller Action Server from Client
+        self.load_controllers_client = rospy.ServiceProxy('/controller_manager/load_controller',
+                LoadController)
+        try:
+            self.load_controllers_client.wait_for_service(timeout)
+            print("controller load service is on")
+        except rospy.exceptions.ROSException as err:
+            print(
+                "Could not reach controller load service. Make sure that the driver is actually running."
+                " Msg: {}".format(err))
+            
+        # Connect to Switch Controller Action Server from Client
         self.switch_controllers_client = rospy.ServiceProxy('/controller_manager/switch_controller',
                 SwitchController)
         try:
             self.switch_controllers_client.wait_for_service(timeout)
-            rospy.loginfo("controller switch service is on")
+            print("controller switch service is on")
         except rospy.exceptions.ROSException as err:
-            rospy.logerr(
+            print(
                 "Could not reach controller switch service. Make sure that the driver is actually running."
                 " Msg: {}".format(err))
-        
-        # Running up the Manipulator (for Real Robot)
-        # resp = self.s_connectToDashboardServer()
-        
-        # self.set_robot_to_mode(RobotMode.POWER_OFF)
-        #rospy.sleep(0.5)
-        # self.set_robot_to_mode(RobotMode.RUNNING)
-        #rospy.sleep(10)
+            
+        # Connect to Cartesian Controller Action Server from Client
+        self.cartesian_passthrough_trajectory_client = actionlib.SimpleActionClient(
+            '/forward_cartesian_traj_controller/follow_cartesian_trajectory', FollowCartesianTrajectoryAction)
+        if not self.cartesian_passthrough_trajectory_client.wait_for_server(timeout):
+            self.fail(
+                "Could not reach cartesian passthrough controller action. Make sure that the driver is actually running."
+                " Msg: {}".format(err))
 
-        # (For Real Robot)
-        # self.s_loadProgram("/programs/ros.urp")
-        # rospy.wait_for_service('/ur_hardware_interface/dashboard/play')
-        # resp = self.s_playProgram()
-        # rospy.sleep(0.5)
 
-        self.switch_on_controller("joint_group_vel_controller")
+
+        # ROS Publisher & Subscriber Initialization
+        # ========================================
+        # script publisher for specific purpose
+        self.script_pub = rospy.Publisher("/ur_hardware_interface/script_command", String, queue_size=1)
+        
+        # velocity control message publisher
+        self.pub = rospy.Publisher('/joint_group_vel_controller/command', Float64MultiArray, queue_size=10)
+
+        # Subscribe TF Information of the End-Effector
+        # sub = rospy.Subscriber("/tf", TFMessage, self.callback)
+        
+
+
+        # Running up the Manipulator
+        # ========================================
+        # Connect to dashboard server
+        resp = self.s_connectToDashboardServer()
+        rospy.loginfo("try to connect to dashboard server.\n result: %s",resp)
+
+        # Load ros.urp program file
+        resp = self.s_loadProgram("/ros.urp")
+        rospy.loginfo("try to load program.\n result: %s",resp)
+        
+        # Try to play external control file
+        rospy.wait_for_service('/ur_hardware_interface/dashboard/play')
+        resp = self.s_playProgram()
+        rospy.loginfo("try to play external control.\n result: %s",resp)
         rospy.sleep(0.5)
 
-        self.pub = rospy.Publisher('/joint_group_vel_controller/command',
-                                   Float64MultiArray, queue_size=10)
-        self.joint_vel_msg = Float64MultiArray()
-        self.joint_vel_msg.data = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+        # Try to switch controller to joint_group_vel_controller
+        # self.switch_on_controller("joint_group_vel_controller")
+        
+        # Switch the Controller for UR Robot to Forward Cartesian Trajectory Controller
+        # self.switch_on_controller("forward_cartesian_traj_controller")
 
-        self.r = rospy.Rate(10)
         pass
 
     def set_power(self, power_mode):
         print(power_mode)
-        if power_mode is 'OFF':            
+        if power_mode == 'OFF':            
             self.set_robot_to_mode(RobotMode.POWER_OFF)
             rospy.loginfo("Manipulator power is off.")
-        elif power_mode is 'ON':            
-            self.set_robot_to_mode(RobotMode.POWER_ON)
+        elif power_mode == 'ON':            
+            self.set_robot_to_mode(RobotMode.RUNNING)
             rospy.loginfo("Manipulator power is on.")
             
 
@@ -170,5 +247,38 @@ class MANIPULATOR:
         #self.r.sleep()
         pass
 
-    def value_control(self, val):
-        pass
+    # Function for Control UR Robot in the Cartesian Coordinate
+    def value_control(self, pose_list):     
+        print(pose_list)
+
+        for l in pose_list:
+            goal = FollowCartesianTrajectoryGoal()
+
+            point = CartesianTrajectoryPoint()
+            point.pose.position.x = l[0]
+            point.pose.position.y = l[1]
+            point.pose.position.z = l[2]
+
+            rot = Rotation.from_euler('xyz', [l[3], l[4], l[5]], degrees=True)
+            rot_quat = rot.as_quat()
+            #print(rot_quat)
+
+            point.pose.orientation.x = -rot_quat[0]
+            point.pose.orientation.y = -rot_quat[1]
+            point.pose.orientation.z = -rot_quat[2]
+            point.pose.orientation.w = -rot_quat[3]
+            #print(point.pose)
+
+            time_from_start = l[6]
+
+            point.time_from_start = rospy.Duration(time_from_start)
+            goal.trajectory.points.append(point)
+            print(str(l) +' is appended')
+        
+            goal.goal_time_tolerance = rospy.Duration(0.6)
+            
+            self.cartesian_passthrough_trajectory_client.send_goal(goal)
+            self.cartesian_passthrough_trajectory_client.wait_for_result()
+            self.cartesian_passthrough_trajectory_client.get_result()
+
+            #rospy.loginfo("Received result SUCCESSFUL")
