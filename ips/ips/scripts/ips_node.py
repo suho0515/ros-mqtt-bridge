@@ -219,8 +219,8 @@ class IPS:
                 q = node_dict_list[i]['position']['quality']  
 
                 # Set the pose of the marker
-                marker.pose.position.x = x + 5.0
-                marker.pose.position.y = y + 5.0
+                marker.pose.position.x = x + 3.0
+                marker.pose.position.y = y + 3.0
                 marker.pose.position.z = z
                 marker.pose.orientation.x = 0.0
                 marker.pose.orientation.y = 0.0
