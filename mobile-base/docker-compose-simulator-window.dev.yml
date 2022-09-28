@@ -1,0 +1,110 @@
+version: '2.2'
+
+networks:
+  pcp-bridge-network:
+    external: true
+
+services:
+  ros-master:
+    image: ros:melodic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.2"
+    restart: always
+
+  mobile-base-simulator:
+    image: aictrobotics/mobile-base:latest
+    container_name: mobile-base-simulator
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.3
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.3"
+      - "DISPLAY=host.docker.internal:0.0"
+      - "LIBGL_ALWAYS_INDIRECT=0"
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_gazebo mir_maze_world.launch"
+    privileged: true
+    restart: always
+
+  # localizer:
+  #   image: aictrobotics/mobile-base:latest
+  #   container_name: localizer
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.4
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.4"
+  #     - "DISPLAY=host.docker.internal:0.0"
+  #     - "LIBGL_ALWAYS_INDIRECT=0"
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_navigation amcl.launch initial_pose_x:=10.0 initial_pose_y:=10.0"
+  #   privileged: true
+  #   restart: always
+
+  # navigator:
+  #   image: aictrobotics/mobile-base:latest
+  #   container_name: navigator
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.5
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.5"
+  #     - "DISPLAY=host.docker.internal:0.0"
+  #     - "LIBGL_ALWAYS_INDIRECT=0"
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_navigation start_planner.launch map_file:=~/catkin_ws/src/mir_gazebo/maps/maze.yaml virtual_walls_map_file:=~/catkin_ws/src/mir_gazebo/maps/maze_virtual_walls.yaml"
+  #   privileged: true
+  #   restart: always
+
+  # rviz:
+  #   image: aictrobotics/mobile-base:latest
+  #   container_name: rviz
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.6
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.6"
+  #     - "DISPLAY=host.docker.internal:0.0"
+  #     - "LIBGL_ALWAYS_INDIRECT=0"
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && rviz -d ~/catkin_ws/src/mir_navigation/rviz/navigation.rviz"
+  #   privileged: true
+  #   restart: always
+
+  dev-container:
+    image: aictrobotics/mobile-base:latest
+    container_name: dev-container
+    depends_on:
+      - ros-master
+    networks:
+      pcp-bridge-network:
+        ipv4_address: 192.168.56.7
+    environment:
+      - "ROS_MASTER_URI=http://192.168.56.2:11311"
+      - "ROS_HOSTNAME=192.168.56.7"
+      - "DISPLAY=host.docker.internal:0.0"
+      - "LIBGL_ALWAYS_INDIRECT=0"
+    volumes: 
+      - C:\github\pcp\mobile-base:/root/catkin_ws/src/mobile-base
+    command: >
+      bash -c "tail -F anything"
+    privileged: true
+    restart: always
