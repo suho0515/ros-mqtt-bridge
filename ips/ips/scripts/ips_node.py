@@ -227,19 +227,39 @@ class IPS:
                 marker.pose.orientation.z = 0.0
                 marker.pose.orientation.w = 1.0
 
+                str_x = ""
+                str_y = ""
+                str_z = ""
+                if x >= 0.0:
+                    str_x = '+' + format(x, '.3f')
+                else:
+                    str_x = format(x, '.3f')
+
+                if y >= 0.0:
+                    str_y = '+' + format(y, '.3f')
+                else:
+                    str_y = format(y, '.3f')
+
+                if z >= 0.0:
+                    str_z = '+' + format(z, '.3f')
+                else:
+                    str_z = format(z, '.3f')
+
                 # set text
                 if node_dict_list[i]['nodeType'] == 'TAG':
-                    str_text = "uwb_tag_position[m]:\n" \
-                                + "  x:" + str(x) + "\n" \
-                                + "  y:" + str(y) + "\n" \
-                                + "  z:" + str(z) + "\n" \
-                                "quality: " + str(q)
+                    str_text = "uwb_tag:\n" \
+                                + "position[m]:" + "\n" \
+                                + "  x:" + str_x + "\n" \
+                                + "  y:" + str_y + "\n" \
+                                + "  z:" + str_z + "\n" \
+                                "quality: " + str(q) + "%"
                 elif node_dict_list[i]['nodeType'] == 'ANCHOR':
-                    str_text = "uwb_anchor_position[m]:\n" \
-                                + "  x:" + str(x) + "\n" \
-                                + "  y:" + str(y) + "\n" \
-                                + "  z:" + str(z) + "\n" \
-                                "quality: " + str(q)
+                    str_text = "uwb_anchor:\n" \
+                                + "position[m]:" + "\n" \
+                                + "  x:" + str_x + "\n" \
+                                + "  y:" + str_y + "\n" \
+                                + "  z:" + str_z + "\n" \
+                                "quality: " + str(q) + "%"
                 marker.text = str_text
 
                 str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/marker"
