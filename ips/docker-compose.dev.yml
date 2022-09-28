@@ -25,8 +25,10 @@ services:
     networks:
       pcp-bridge-network:
         ipv4_address: 192.168.56.3
+    # command: >
+      # bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ips ips.launch ip_address:="192.168.1.59" port:=1883"
     command: >
-      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ips ips.launch ip_address:="192.168.1.59" port:=1883"
+      bash -c "tail -F anything"      
     environment:
       - "ROS_MASTER_URI=http://192.168.56.2:11311"
       - "ROS_HOSTNAME=192.168.56.3"
@@ -62,20 +64,20 @@ services:
     privileged: true
     restart: always
 
-  pose-estimator:
-    image: aictrobotics/ips:latest
-    container_name: pose-estimator
-    depends_on:
-      - ros-master
-    networks:
-      pcp-bridge-network:
-        ipv4_address: 192.168.56.6
-    command: >
-      bash -c "tail -F anything"
-    environment:
-      - "ROS_MASTER_URI=http://192.168.56.2:11311"
-      - "ROS_HOSTNAME=192.168.56.6"
-    volumes: 
-      - ~/github/pcp/ips:/root/catkin_ws/src/ips
-    privileged: true
-    restart: always
+  # pose-estimator:
+  #   image: aictrobotics/ips:latest
+  #   container_name: pose-estimator
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.6
+  #   command: >
+  #     bash -c "tail -F anything"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.6"
+  #   volumes: 
+  #     - ~/github/pcp/ips:/root/catkin_ws/src/ips
+  #   privileged: true
+  #   restart: always
