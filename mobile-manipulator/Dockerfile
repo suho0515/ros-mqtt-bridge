@@ -83,6 +83,9 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     catkin_make -DCMAKE_BUILD_TYPE=RelWithDebugInfo &&\
     source devel/setup.bash"
 
+# for fast build update
+CMD ["echo", "update mobile manipulator"]
+
 # Mobile Manipulator Package
 # ========================================
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\

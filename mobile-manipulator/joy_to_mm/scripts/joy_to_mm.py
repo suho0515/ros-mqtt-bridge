@@ -74,9 +74,7 @@ class JOY_TO_MM:
         # publish autoset
         self.publish_autoset(right_data.buttons[7],
                         right_data.buttons[9],
-                        right_data.buttons[11],
-                        right_data.buttons[6],
-                        right_data.buttons[8])
+                        right_data.buttons[11])
 
         # publish auto play/stop
         self.publish_auto_play(right_data.buttons[6])
