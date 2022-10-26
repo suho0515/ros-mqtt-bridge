@@ -71,7 +71,7 @@ class MOBILE_MANIPULATOR:
         pass
 
     def auto_callback(self, auto):
-        # print(auto)
+        print(auto)
         self.auto = auto.data
         if self.auto == 'PLAY':
             self.event.set()

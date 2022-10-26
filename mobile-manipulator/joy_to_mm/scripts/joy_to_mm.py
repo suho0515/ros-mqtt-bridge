@@ -157,7 +157,7 @@ class JOY_TO_MM:
 
     def publish_auto_play(self, signal):
         if signal:
-            self.auto_pub.publish('AUTO')
+            self.auto_pub.publish('PLAY')
     def publish_auto_stop(self, signal):
         if signal:
             self.auto_pub.publish('STOP')
