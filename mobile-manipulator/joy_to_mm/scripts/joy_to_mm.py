@@ -167,17 +167,6 @@ class JOY_TO_MM:
                 self.auto_flag = False
         pass
 
-    def publish_auto_play(self, auto):
-        if self.control_mode is 'AUTO':
-            if auto:
-                if self.auto is 'STOP':
-                    self.auto = 'PLAY'
-                else:
-                    self.auto = 'STOP'
-                self.auto_pub.publish(self.auto)
-        pass
-
-
     def publish_auto_play(self, signal):
         if signal:
             self.auto_pub.publish('AUTO')

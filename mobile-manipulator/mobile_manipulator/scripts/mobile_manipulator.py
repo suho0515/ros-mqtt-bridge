@@ -79,6 +79,10 @@ class MOBILE_MANIPULATOR:
             proc_thread.start()
         elif self.auto == 'STOP':
             self.event.clear()
+        elif self.auto == 'CLEAR':
+            self.event.clear()
+            del self.value_list[:]
+            self.value_list[:] = []
         pass
 
     def set_control_mode(self, control_mode):
