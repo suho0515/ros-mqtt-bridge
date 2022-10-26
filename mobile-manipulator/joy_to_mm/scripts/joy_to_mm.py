@@ -133,20 +133,14 @@ class JOY_TO_MM:
     def publish_autoset(self, 
                     autoset1, 
                     autoset2, 
-                    autoset3, 
-                    autoset4, 
-                    autoset5):
+                    autoset3):
         if self.control_mode is 'AUTO':
             if (autoset1 == 1) \
                 or (autoset2 == 1) \
-                or (autoset3 == 1) \
-                or (autoset4 == 1) \
-                or (autoset5 == 1):
+                or (autoset3 == 1):
                 sum = autoset1 \
                     + autoset2 \
-                    + autoset3 \
-                    + autoset4 \
-                    + autoset5
+                    + autoset3
                 if sum == 1:
                     if self.auto_flag is False:
                         if autoset1:
@@ -155,10 +149,6 @@ class JOY_TO_MM:
                             self.autoset = 'AUTOSET2'
                         elif autoset3:
                             self.autoset = 'AUTOSET3'
-                        elif autoset4:
-                            self.autoset = 'AUTOSET4'
-                        elif autoset5:
-                            self.autoset = 'AUTOSET5'
                         self.autoset_pub.publish(self.autoset)
                         self.auto_flag = True
             else:
