@@ -108,7 +108,7 @@ services:
       - "ROS_HOSTNAME=192.168.56.7"
     command: >      
       bash -c "source ~/catkin_ws/devel/setup.bash &&
-              roslaunch ur_robot_driver ur3e_bringup.launch robot_ip:=192.168.56.5"
+              roslaunch ur_robot_driver ur3e_bringup.launch robot_ip:=192.168.56.5 controllers:="forward_cartesian_traj_controller joint_group_vel_controller joint_state_controller" stopped_controllers:="pos_joint_traj_controller""
     privileged: true
     restart: always
 

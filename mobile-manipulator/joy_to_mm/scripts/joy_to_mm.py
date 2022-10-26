@@ -40,10 +40,12 @@ class JOY_TO_MM:
         pass
 
     def proc_left_joy(self, left_data):
+        self.publish_mp_on_mode(left_data.buttons[7])
+        self.publish_mp_off_mode(left_data.buttons[9])
         # publish control mode
-        self.publish_power_mode(left_data.buttons[7])
+        #self.publish_power_mode(left_data.buttons[7])
         # publish torque mode
-        self.publish_torque_mode(left_data.buttons[9])
+        #self.publish_torque_mode(left_data.buttons[9])
         # publish control mode
         self.publish_control_mode(left_data.buttons[6],
                                 left_data.buttons[8],
@@ -77,7 +79,19 @@ class JOY_TO_MM:
                         right_data.buttons[8])
 
         # publish auto play/stop
-        self.publish_auto(right_data.buttons[10])
+        self.publish_auto_play(right_data.buttons[6])
+        self.publish_auto_stop(right_data.buttons[8])
+        self.publish_auto_clear(right_data.buttons[10])
+        #self.publish_auto(right_data.buttons[10])
+        pass
+
+    def publish_mp_on_mode(self, signal):
+        if signal:
+            self.power_mode_pub.publish('ON')
+        pass
+    def publish_mp_off_mode(self, signal):
+        if signal:
+            self.power_mode_pub.publish('OFF')
         pass
 
     def publish_power_mode(self, power_mode):
@@ -153,7 +167,28 @@ class JOY_TO_MM:
                 self.auto_flag = False
         pass
 
-    def publish_auto(self, auto):
+    def publish_auto_play(self, auto):
+        if self.control_mode is 'AUTO':
+            if auto:
+                if self.auto is 'STOP':
+                    self.auto = 'PLAY'
+                else:
+                    self.auto = 'STOP'
+                self.auto_pub.publish(self.auto)
+        pass
+
+
+    def publish_auto_play(self, signal):
+        if signal:
+            self.auto_pub.publish('AUTO')
+    def publish_auto_stop(self, signal):
+        if signal:
+            self.auto_pub.publish('STOP')
+    def publish_auto_clear(self, signal):
+        if signal:
+            self.auto_pub.publish('CLEAR')
+
+    def publish_auto(self, signal):
         if self.control_mode is 'AUTO':
             if auto:
                 if self.auto is 'STOP':

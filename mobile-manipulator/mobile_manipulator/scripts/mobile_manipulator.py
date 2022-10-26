@@ -10,9 +10,14 @@ from std_msgs.msg import String
 from std_msgs.msg import Float64MultiArray
 
 import json
+from threading import Thread, Event
+
 
 class MOBILE_MANIPULATOR:
     def __init__(self):
+        self.auto = 'STOP'
+        self.control_mode = 'WAIT'
+
         self.mb = MOBILE_BASE()
         self.mp = MANIPULATOR()
 
@@ -27,6 +32,7 @@ class MOBILE_MANIPULATOR:
 
         self.task_db = self.load_db(self.path)
         self.task_list = []
+        self.value_list = []
         self.resp = None
 
         rospy.Subscriber('/power_mode',String, self.power_mode_callback)
@@ -35,6 +41,8 @@ class MOBILE_MANIPULATOR:
         rospy.Subscriber('/autoset',String, self.autoset_callback)
         rospy.Subscriber('/auto',String, self.auto_callback)
         rospy.Subscriber('/manual',Float64MultiArray, self.manual_callback)
+
+        self.event = Event()
 
     def power_mode_callback(self, power_mode):
         #print(power_mode)
@@ -54,17 +62,36 @@ class MOBILE_MANIPULATOR:
 
     def autoset_callback(self, autoset):
         if autoset.data == "AUTOSET1":
-            self.add_tasks_to_list(self.task_db['task_list']['test_01'])    
-        rospy.loginfo("tasks are added to task list. task_list is %s", self.task_list)
+            self.add_task_to_list(self.task_db['task_list']['test_01'])
+        if autoset.data == "AUTOSET2":
+            self.add_task_to_list(self.task_db['task_list']['test_02'])
+        rospy.loginfo("task list are added to value list.")
+        # rospy.loginfo("task_list : %s", self.task_db['task_list']['test_01'])
+        rospy.loginfo("value_list : %s", self.value_list)
         pass
 
     def auto_callback(self, auto):
         # print(auto)
-        self.proc_task_list(auto.data)
+        self.auto = auto.data
+        if self.auto == 'PLAY':
+            self.event.set()
+            proc_thread = Thread(target=self.proc_task_list)
+            proc_thread.start()
+        elif self.auto == 'STOP':
+            self.event.clear()
         pass
 
     def set_control_mode(self, control_mode):
         self.control_mode = control_mode
+        if control_mode == 'WAIT':
+            self.mp.switch_on_controller("")
+            rospy.loginfo("mobile manipulator control mode is 'WAIT'")
+        elif control_mode == 'MANUAL':
+            self.mp.switch_on_controller("joint_group_vel_controller")
+            rospy.loginfo("mobile manipulator control mode is 'MANUAL'")
+        elif control_mode == 'AUTO':
+            self.mp.switch_on_controller("forward_cartesian_traj_controller")
+            rospy.loginfo("mobile manipulator control mode is 'AUTO'")
         pass
 
     def manual_callback(self, msg):
@@ -80,8 +107,9 @@ class MOBILE_MANIPULATOR:
         pass
 
     def stop(self, ):
-        self.mb.velocity_control(0.0, 0.0)
-        self.mp.velocity_control(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+        if self.control_mode == 'MANUAL':
+            self.mb.velocity_control(0.0, 0.0)
+            self.mp.velocity_control(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         pass
 
     def load_db(self, path):
@@ -89,25 +117,39 @@ class MOBILE_MANIPULATOR:
             db = json.load(st_json)
             return db
 
-    def add_tasks_to_list(self, task_list):
+    def add_task_to_list(self, task_list):
         for i in range(len(task_list)):
-            self.task_list.append(task_list[i])        
+            key, task = task_list[i].items()[0]
+            if key == "mp":
+                for j in self.task_db[key][task]:
+                    value_dict = {'key': 'mp', 'val': j}
+                    self.value_list.append(value_dict)
+            elif key == "mb":
+                value_dict = {'key': 'mb', 'val': self.task_db[key][task]}
+                self.value_list.append(value_dict)
 
-    def proc_task_list(self, auto):
-        for i in range(len(self.task_list)):
-            if auto == 'PLAY':
-                # print(self.task_list[i])
-                key, val = self.task_list[0].items()[0]
+    def proc_task_list(self):
+        
+        for i in range(len(self.value_list)):
+            rospy.loginfo(self.auto)
+            # print(self.value_list)
+            if self.event.is_set() == True:
+                # key, val = self.value_list[0].items()[0]
+                key = self.value_list[0]['key']
+                val = self.value_list[0]['val']
                 # print(key)
                 # print(val)
-                # print(self.task_db[key][val])
+                # print(key == "mp")
                 if key == "mp":
-                    self.mp.value_control(self.task_db[key][val])
-                    del self.task_list[0]
+                    self.mp.value_control(val)
+                    del self.value_list[0]
+                    print(self.auto)
                 elif key == "mb":
-                    self.mb.value_control(self.task_db[key][val])
-                    del self.task_list[0]
+                    self.mb.value_control(val)
+                    del self.value_list[0]
+                # rospy.loginfo("value control [%s] is done", self.value_list[0])
             else:
-                break
+                self.stop()
+                return
         pass
 

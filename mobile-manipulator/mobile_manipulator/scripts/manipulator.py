@@ -144,8 +144,11 @@ class MANIPULATOR:
         # Connect to Cartesian Controller Action Server from Client
         self.cartesian_passthrough_trajectory_client = actionlib.SimpleActionClient(
             '/forward_cartesian_traj_controller/follow_cartesian_trajectory', FollowCartesianTrajectoryAction)
-        if not self.cartesian_passthrough_trajectory_client.wait_for_server(timeout):
-            self.fail(
+        try:            
+            self.cartesian_passthrough_trajectory_client.wait_for_server(timeout)
+            rospy.loginfo("cartesian trajectory controller is turned on.")
+        except rospy.exceptions.ROSException as err:
+            print(
                 "Could not reach cartesian passthrough controller action. Make sure that the driver is actually running."
                 " Msg: {}".format(err))
 
@@ -180,11 +183,9 @@ class MANIPULATOR:
         rospy.loginfo("try to play external control.\n result: %s",resp)
         rospy.sleep(0.5)
 
-        # Try to switch controller to joint_group_vel_controller
-        # self.switch_on_controller("joint_group_vel_controller")
-        
-        # Switch the Controller for UR Robot to Forward Cartesian Trajectory Controller
-        # self.switch_on_controller("forward_cartesian_traj_controller")
+        self.set_power('OFF')
+        rospy.sleep(2.0)
+        self.set_power('ON')
 
         pass
 
@@ -248,7 +249,78 @@ class MANIPULATOR:
         pass
 
     # Function for Control UR Robot in the Cartesian Coordinate
-    def value_control(self, pose_list):     
+    def value_control(self, p):     
+        # print(p)
+
+        goal = FollowCartesianTrajectoryGoal()
+
+        point = CartesianTrajectoryPoint()
+        point.pose.position.x = p[0]
+        point.pose.position.y = p[1]
+        point.pose.position.z = p[2]
+
+        rot = Rotation.from_euler('xyz', [p[3], p[4], p[5]], degrees=True)
+        rot_quat = rot.as_quat()
+        #print(rot_quat)
+
+        point.pose.orientation.x = -rot_quat[0]
+        point.pose.orientation.y = -rot_quat[1]
+        point.pose.orientation.z = -rot_quat[2]
+        point.pose.orientation.w = -rot_quat[3]
+        #print(point.pose)
+
+        time_from_start = p[6]
+
+        point.time_from_start = rospy.Duration(time_from_start)
+        goal.trajectory.points.append(point)
+        print(str(p) +' is appended')
+    
+        goal.goal_time_tolerance = rospy.Duration(0.6)
+        
+        self.cartesian_passthrough_trajectory_client.send_goal(goal)
+        self.cartesian_passthrough_trajectory_client.wait_for_result()
+        result = self.cartesian_passthrough_trajectory_client.get_result()
+
+        rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
+
+    # Function for Control UR Robot in the Cartesian Coordinate
+    def value_list_control(self, pose_list):     
+        # print(pose_list)
+
+        for l in pose_list:
+            goal = FollowCartesianTrajectoryGoal()
+
+            point = CartesianTrajectoryPoint()
+            point.pose.position.x = l[0]
+            point.pose.position.y = l[1]
+            point.pose.position.z = l[2]
+
+            rot = Rotation.from_euler('xyz', [l[3], l[4], l[5]], degrees=True)
+            rot_quat = rot.as_quat()
+            #print(rot_quat)
+
+            point.pose.orientation.x = -rot_quat[0]
+            point.pose.orientation.y = -rot_quat[1]
+            point.pose.orientation.z = -rot_quat[2]
+            point.pose.orientation.w = -rot_quat[3]
+            #print(point.pose)
+
+            time_from_start = l[6]
+
+            point.time_from_start = rospy.Duration(time_from_start)
+            goal.trajectory.points.append(point)
+            print(str(l) +' is appended')
+        
+            goal.goal_time_tolerance = rospy.Duration(0.6)
+            
+            self.cartesian_passthrough_trajectory_client.send_goal(goal)
+            self.cartesian_passthrough_trajectory_client.wait_for_result()
+            result = self.cartesian_passthrough_trajectory_client.get_result()
+
+            rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
+
+    # Function for Control UR Robot in the Cartesian Coordinate
+    def value_list_control(self, pose_list):     
         print(pose_list)
 
         for l in pose_list:
@@ -279,6 +351,6 @@ class MANIPULATOR:
             
             self.cartesian_passthrough_trajectory_client.send_goal(goal)
             self.cartesian_passthrough_trajectory_client.wait_for_result()
-            self.cartesian_passthrough_trajectory_client.get_result()
+            result = self.cartesian_passthrough_trajectory_client.get_result()
 
-            #rospy.loginfo("Received result SUCCESSFUL")
+            rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
