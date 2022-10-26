@@ -3,9 +3,10 @@ import rospy
 import sys
 import paho.mqtt.client as mqtt
 import json
-from geometry_msgs.msg import PoseStamped, Quaternion
+from geometry_msgs.msg import PoseStamped, Quaternion, Point
 from tf.transformations import quaternion_from_euler 
 from std_msgs.msg import Int16
+from visualization_msgs.msg import Marker
 
 class IPS:
     def __init__(self):
@@ -59,6 +60,7 @@ class IPS:
 
         self.position_publisher(self.node_dict_list)
         self.quality_publisher(self.node_dict_list)
+        self.marker_publisher(self.node_dict_list)
         
         # print(self.node_dict_list)
         # print('\n')
@@ -185,6 +187,85 @@ class IPS:
                 q_pub = rospy.Publisher(str_name, Int16, queue_size=10)
 
                 q_pub.publish(q)
+
+    def marker_publisher(self, node_dict_list):
+        
+        marker = Marker()
+
+        marker.header.frame_id = "/map"
+
+        # set shape, Arrow: 0; Cube: 1 ; Sphere: 2 ; Cylinder: 3
+        marker.type = 9
+        marker.id = 0
+
+        # Set the scale of the marker
+        marker.scale.x = 0.5
+        marker.scale.y = 0.5
+        marker.scale.z = 0.5
+
+        # Set the color
+        marker.color.r = 1.0
+        marker.color.g = 1.0
+        marker.color.b = 1.0
+        marker.color.a = 0.5
+
+        for i in range(len(node_dict_list)):
+            if 'position' in node_dict_list[i]:
+                marker.header.stamp = rospy.Time.now()
+
+                x = node_dict_list[i]['position']['x']  
+                y = node_dict_list[i]['position']['y']
+                z = node_dict_list[i]['position']['z']
+                q = node_dict_list[i]['position']['quality']  
+
+                # Set the pose of the marker
+                marker.pose.position.x = x + 3.0
+                marker.pose.position.y = y + 3.0
+                marker.pose.position.z = z
+                marker.pose.orientation.x = 0.0
+                marker.pose.orientation.y = 0.0
+                marker.pose.orientation.z = 0.0
+                marker.pose.orientation.w = 1.0
+
+                str_x = ""
+                str_y = ""
+                str_z = ""
+                if x >= 0.0:
+                    str_x = '+' + format(x, '.3f')
+                else:
+                    str_x = format(x, '.3f')
+
+                if y >= 0.0:
+                    str_y = '+' + format(y, '.3f')
+                else:
+                    str_y = format(y, '.3f')
+
+                if z >= 0.0:
+                    str_z = '+' + format(z, '.3f')
+                else:
+                    str_z = format(z, '.3f')
+
+                # set text
+                if node_dict_list[i]['nodeType'] == 'TAG':
+                    str_text = "uwb_tag:\n" \
+                                + "position[m]:" + "\n" \
+                                + "  x:" + str_x + "\n" \
+                                + "  y:" + str_y + "\n" \
+                                + "  z:" + str_z + "\n" \
+                                "quality: " + str(q) + "%"
+                elif node_dict_list[i]['nodeType'] == 'ANCHOR':
+                    str_text = "uwb_anchor:\n" \
+                                + "position[m]:" + "\n" \
+                                + "  x:" + str_x + "\n" \
+                                + "  y:" + str_y + "\n" \
+                                + "  z:" + str_z + "\n" \
+                                "quality: " + str(q) + "%"
+                marker.text = str_text
+
+                str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/marker"
+                m_pub = rospy.Publisher(str_name, Marker, queue_size=10)
+
+                m_pub.publish(marker)
 
 def main(args):
   rospy.init_node('ips', anonymous=True)
