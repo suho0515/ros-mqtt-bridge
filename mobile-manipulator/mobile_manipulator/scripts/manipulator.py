@@ -45,6 +45,8 @@ from tf2_msgs.msg import TFMessage
 # It used for convert quaternion to euler or euler to quaternion
 from scipy.spatial.transform import Rotation
 
+import numpy as np
+
 # If your robot description is created with a tf_prefix, those would have to be adapted
 JOINT_NAMES = [
     "shoulder_pan_joint",
@@ -163,7 +165,7 @@ class MANIPULATOR:
         self.pub = rospy.Publisher('/joint_group_vel_controller/command', Float64MultiArray, queue_size=10)
 
         # Subscribe TF Information of the End-Effector
-        # sub = rospy.Subscriber("/tf", TFMessage, self.callback)
+        self.tf_sub = rospy.Subscriber("/tf", TFMessage, self.tf_callback)
         
 
 
@@ -354,3 +356,12 @@ class MANIPULATOR:
             result = self.cartesian_passthrough_trajectory_client.get_result()
 
             rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
+
+    # def tf_callback(self, tf_msg):
+    #     # print(tf_msg.transforms[0].transform)
+    #     p = tf_msg.transforms[0].transform.translation
+    #     x = np.array([p.x,p.y,p.z])
+    #     v = np.linalg.norm(x)
+    #     print(v)
+    #     if v > 0.6:
+    #         self.stop()

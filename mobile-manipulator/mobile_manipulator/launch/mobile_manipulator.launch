@@ -1,0 +1,12 @@
+<launch>
+  
+  <arg name="mm" default="false"/>
+  <arg name="mp" default="false"/>
+  <arg name="mb" default="true"/>
+  <node name="mobile_manipulator" pkg="mobile_manipulator" type="mobile_manipulator_node.py" output="screen" >
+      <param name="mm" type="bool" value="$(arg mm)" />
+      <param name="mp" type="bool" value="$(arg mp)" />
+      <param name="mb" type="bool" value="$(arg mb)" />
+  </node>
+  
+</launch>

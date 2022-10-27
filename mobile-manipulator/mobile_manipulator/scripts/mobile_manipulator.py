@@ -18,9 +18,15 @@ class MOBILE_MANIPULATOR:
         self.auto = 'STOP'
         self.control_mode = 'WAIT'
 
-        self.mb = MOBILE_BASE()
-        self.mp = MANIPULATOR()
-
+        self.mp_param = rospy.get_param('/mobile_manipulator/mp')
+        self.mb_param = rospy.get_param('/mobile_manipulator/mb')
+        # print(self.mp_param)
+        # print(self.mb_param)
+        if self.mp_param == True:
+            self.mp = MANIPULATOR()
+        if self.mb_param == True:
+            self.mb = MOBILE_BASE()
+        
         # get an instance of RosPack with the default search paths
         self.rospack = rospkg.RosPack()
         # list all packages, equivalent to rospack list
@@ -29,12 +35,12 @@ class MOBILE_MANIPULATOR:
         self.path = self.rospack.get_path('mobile_manipulator')
 
         self.path = self.path + "/db/task_db.json"
-
+        
         self.task_db = self.load_db(self.path)
         self.task_list = []
         self.value_list = []
         self.resp = None
-
+        
         rospy.Subscriber('/power_mode',String, self.power_mode_callback)
         rospy.Subscriber('/torque_mode',String, self.torque_mode_callback)
         rospy.Subscriber('/control_mode',String, self.control_mode_callback)
@@ -44,14 +50,18 @@ class MOBILE_MANIPULATOR:
 
         self.event = Event()
 
+        rospy.loginfo("mobile manipulator is initialized.")
+
     def power_mode_callback(self, power_mode):
         #print(power_mode)
-        self.mp.set_power(power_mode.data)
+        if self.mp_param == True:
+            self.mp.set_power(power_mode.data)
         pass
 
     def torque_mode_callback(self, torque_mode):
         #print(torque_mode)
-        self.mp.set_torque(torque_mode.data)
+        if self.mp_param == True:
+            self.mp.set_torque(torque_mode.data)
         pass    
 
     def control_mode_callback(self, control_mode):
@@ -63,8 +73,10 @@ class MOBILE_MANIPULATOR:
     def autoset_callback(self, autoset):
         if autoset.data == "AUTOSET1":
             self.add_task_to_list(self.task_db['task_list']['test_01'])
-        if autoset.data == "AUTOSET2":
+        elif autoset.data == "AUTOSET2":
             self.add_task_to_list(self.task_db['task_list']['test_02'])
+        elif autoset.data == "AUTOSET3":
+            self.add_task_to_list(self.task_db['task_list']['test_03'])
         rospy.loginfo("task list are added to value list.")
         # rospy.loginfo("task_list : %s", self.task_db['task_list']['test_01'])
         rospy.loginfo("value_list : %s", self.value_list)
@@ -88,14 +100,17 @@ class MOBILE_MANIPULATOR:
     def set_control_mode(self, control_mode):
         self.control_mode = control_mode
         if control_mode == 'WAIT':
-            self.mp.switch_on_controller("")
-            rospy.loginfo("mobile manipulator control mode is 'WAIT'")
+            if self.mp_param == True:
+                self.mp.switch_on_controller("")
+                rospy.loginfo("mobile manipulator control mode is 'WAIT'")
         elif control_mode == 'MANUAL':
-            self.mp.switch_on_controller("joint_group_vel_controller")
-            rospy.loginfo("mobile manipulator control mode is 'MANUAL'")
+            if self.mp_param == True:
+                self.mp.switch_on_controller("joint_group_vel_controller")
+                rospy.loginfo("mobile manipulator control mode is 'MANUAL'")
         elif control_mode == 'AUTO':
-            self.mp.switch_on_controller("forward_cartesian_traj_controller")
-            rospy.loginfo("mobile manipulator control mode is 'AUTO'")
+            if self.mp_param == True:
+                self.mp.switch_on_controller("forward_cartesian_traj_controller")
+                rospy.loginfo("mobile manipulator control mode is 'AUTO'")
         pass
 
     def manual_callback(self, msg):
@@ -105,15 +120,19 @@ class MOBILE_MANIPULATOR:
     def manual_control(self, trigger, mb_trans, mb_orient, mp_v1, mp_v2, mp_v3, mp_v4, mp_v5, mp_v6):
         if (self.control_mode == 'MANUAL'):
             if trigger:
-                self.mb.velocity_control(mb_trans, mb_orient)
+                if self.mb_param == True:
+                    self.mb.velocity_control(mb_trans, mb_orient)
             else:
-                self.mp.velocity_control(mp_v1, mp_v2, mp_v3, mp_v4, mp_v5, mp_v6)
+                if self.mp_param == True:
+                    self.mp.velocity_control(mp_v1, mp_v2, mp_v3, mp_v4, mp_v5, mp_v6)
         pass
 
     def stop(self, ):
         if self.control_mode == 'MANUAL':
-            self.mb.velocity_control(0.0, 0.0)
-            self.mp.velocity_control(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
+            if self.mb_param == True:
+                self.mb.velocity_control(0.0, 0.0)
+            if self.mp_param == True:
+                self.mp.velocity_control(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
         pass
 
     def load_db(self, path):
@@ -145,11 +164,13 @@ class MOBILE_MANIPULATOR:
                 # print(val)
                 # print(key == "mp")
                 if key == "mp":
-                    self.mp.value_control(val)
+                    if self.mp_param == True:
+                        self.mp.value_control(val)
                     del self.value_list[0]
-                    print(self.auto)
+                    # print(self.auto)
                 elif key == "mb":
-                    self.mb.value_control(val)
+                    if self.mb_param == True:
+                        self.mb.value_control(val)
                     del self.value_list[0]
                 # rospy.loginfo("value control [%s] is done", self.value_list[0])
             else:
