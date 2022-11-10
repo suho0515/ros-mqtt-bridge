@@ -39,10 +39,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
 
 # UR Driver
 # ========================================
-# Install Preliminaries
-RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
-    pip install scipy"
-
 # Install UR Robot Driver
 RUN /bin/bash -c "apt-get update &&\
     source /opt/ros/melodic/setup.bash &&\
@@ -82,9 +78,6 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     cd ~/catkin_ws &&\
     catkin_make -DCMAKE_BUILD_TYPE=RelWithDebugInfo &&\
     source devel/setup.bash"
-
-# for fast build update
-CMD ["echo", "update mobile manipulator_20221027"]
 
 # Mobile Manipulator Package
 # ========================================

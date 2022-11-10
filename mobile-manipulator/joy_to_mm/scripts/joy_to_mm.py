@@ -40,10 +40,12 @@ class JOY_TO_MM:
         pass
 
     def proc_left_joy(self, left_data):
+        self.publish_mp_on_mode(left_data.buttons[7])
+        self.publish_mp_off_mode(left_data.buttons[9])
         # publish control mode
-        self.publish_power_mode(left_data.buttons[7])
+        #self.publish_power_mode(left_data.buttons[7])
         # publish torque mode
-        self.publish_torque_mode(left_data.buttons[9])
+        #self.publish_torque_mode(left_data.buttons[9])
         # publish control mode
         self.publish_control_mode(left_data.buttons[6],
                                 left_data.buttons[8],
@@ -72,12 +74,22 @@ class JOY_TO_MM:
         # publish autoset
         self.publish_autoset(right_data.buttons[7],
                         right_data.buttons[9],
-                        right_data.buttons[11],
-                        right_data.buttons[6],
-                        right_data.buttons[8])
+                        right_data.buttons[11])
 
         # publish auto play/stop
-        self.publish_auto(right_data.buttons[10])
+        self.publish_auto_play(right_data.buttons[6])
+        self.publish_auto_stop(right_data.buttons[8])
+        self.publish_auto_clear(right_data.buttons[10])
+        #self.publish_auto(right_data.buttons[10])
+        pass
+
+    def publish_mp_on_mode(self, signal):
+        if signal:
+            self.power_mode_pub.publish('ON')
+        pass
+    def publish_mp_off_mode(self, signal):
+        if signal:
+            self.power_mode_pub.publish('OFF')
         pass
 
     def publish_power_mode(self, power_mode):
@@ -121,20 +133,14 @@ class JOY_TO_MM:
     def publish_autoset(self, 
                     autoset1, 
                     autoset2, 
-                    autoset3, 
-                    autoset4, 
-                    autoset5):
+                    autoset3):
         if self.control_mode is 'AUTO':
             if (autoset1 == 1) \
                 or (autoset2 == 1) \
-                or (autoset3 == 1) \
-                or (autoset4 == 1) \
-                or (autoset5 == 1):
+                or (autoset3 == 1):
                 sum = autoset1 \
                     + autoset2 \
-                    + autoset3 \
-                    + autoset4 \
-                    + autoset5
+                    + autoset3
                 if sum == 1:
                     if self.auto_flag is False:
                         if autoset1:
@@ -143,17 +149,23 @@ class JOY_TO_MM:
                             self.autoset = 'AUTOSET2'
                         elif autoset3:
                             self.autoset = 'AUTOSET3'
-                        elif autoset4:
-                            self.autoset = 'AUTOSET4'
-                        elif autoset5:
-                            self.autoset = 'AUTOSET5'
                         self.autoset_pub.publish(self.autoset)
                         self.auto_flag = True
             else:
                 self.auto_flag = False
         pass
 
-    def publish_auto(self, auto):
+    def publish_auto_play(self, signal):
+        if signal:
+            self.auto_pub.publish('PLAY')
+    def publish_auto_stop(self, signal):
+        if signal:
+            self.auto_pub.publish('STOP')
+    def publish_auto_clear(self, signal):
+        if signal:
+            self.auto_pub.publish('CLEAR')
+
+    def publish_auto(self, signal):
         if self.control_mode is 'AUTO':
             if auto:
                 if self.auto is 'STOP':
