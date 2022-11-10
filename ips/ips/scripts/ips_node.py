@@ -5,8 +5,9 @@ import paho.mqtt.client as mqtt
 import json
 from geometry_msgs.msg import PoseStamped, Quaternion, Point
 from tf.transformations import quaternion_from_euler 
-from std_msgs.msg import Int16
+from std_msgs.msg import Int16, String
 from visualization_msgs.msg import Marker
+from ips.msg import Tag
 
 class IPS:
     def __init__(self):
@@ -59,8 +60,8 @@ class IPS:
             self.node_dict_list = self.location_msg_to_dict(self.node_dict_list, topic, payload)
 
         self.position_publisher(self.node_dict_list)
-        self.quality_publisher(self.node_dict_list)
-        self.marker_publisher(self.node_dict_list)
+        self.text_marker_publisher(self.node_dict_list)
+        self.sphere_marker_publisher(self.node_dict_list)
         
         # print(self.node_dict_list)
         # print('\n')
@@ -155,22 +156,21 @@ class IPS:
 
     def position_publisher(self, node_dict_list):
         
-        p = PoseStamped()
+        p = Tag()
 
         for i in range(len(node_dict_list)):
             if 'position' in node_dict_list[i]:
                 p.header.frame_id = 'map'
                 p.header.stamp = rospy.Time.now()
 
-                p.pose.position.x = node_dict_list[i]['position']['x']  
-                p.pose.position.y = node_dict_list[i]['position']['y']
-                p.pose.position.z = node_dict_list[i]['position']['z']
-
-                q = quaternion_from_euler(0.0, 0.0, 0.0)
-                p.pose.orientation = Quaternion(*q)
+                p.id.data = node_dict_list[i]['id']  
+                p.position.x = node_dict_list[i]['position']['x']  
+                p.position.y = node_dict_list[i]['position']['y']
+                p.position.z = node_dict_list[i]['position']['z']
+                p.quality.data = node_dict_list[i]['position']['quality']
 
                 str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/position"
-                p_pub = rospy.Publisher(str_name, PoseStamped, queue_size=10)
+                p_pub = rospy.Publisher(str_name, Tag, queue_size=10)
 
                 p_pub.publish(p)
 
@@ -188,7 +188,7 @@ class IPS:
 
                 q_pub.publish(q)
 
-    def marker_publisher(self, node_dict_list):
+    def text_marker_publisher(self, node_dict_list):
         
         marker = Marker()
 
@@ -219,8 +219,8 @@ class IPS:
                 q = node_dict_list[i]['position']['quality']  
 
                 # Set the pose of the marker
-                marker.pose.position.x = x + 3.0
-                marker.pose.position.y = y + 3.0
+                marker.pose.position.x = x + 2.0
+                marker.pose.position.y = y + 2.0
                 marker.pose.position.z = z
                 marker.pose.orientation.x = 0.0
                 marker.pose.orientation.y = 0.0
@@ -262,10 +262,56 @@ class IPS:
                                 "quality: " + str(q) + "%"
                 marker.text = str_text
 
-                str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/marker"
+                str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/text_marker"
                 m_pub = rospy.Publisher(str_name, Marker, queue_size=10)
 
                 m_pub.publish(marker)
+
+    def sphere_marker_publisher(self, node_dict_list):
+        
+        marker = Marker()
+
+        marker.header.frame_id = "/map"
+
+        # set shape, Arrow: 0; Cube: 1 ; Sphere: 2 ; Cylinder: 3
+        marker.type = 2
+        marker.id = 0
+
+        # Set the scale of the marker
+        marker.scale.x = 0.2
+        marker.scale.y = 0.2
+        marker.scale.z = 0.2
+
+        
+
+        for i in range(len(node_dict_list)):
+            if 'position' in node_dict_list[i]:
+                marker.header.stamp = rospy.Time.now()
+
+                x = node_dict_list[i]['position']['x']  
+                y = node_dict_list[i]['position']['y']
+                z = node_dict_list[i]['position']['z']
+                q = node_dict_list[i]['position']['quality']  
+
+                # Set the color
+                marker.color.r = q*0.01
+                marker.color.g = q*0.01
+                marker.color.b = q*0.01
+                marker.color.a = 1.0
+
+                # Set the pose of the marker
+                marker.pose.position.x = x
+                marker.pose.position.y = y
+                marker.pose.position.z = z
+                marker.pose.orientation.x = 0.0
+                marker.pose.orientation.y = 0.0
+                marker.pose.orientation.z = 0.0
+                marker.pose.orientation.w = 1.0
+
+                str_name = "/dwm/node/" + node_dict_list[i]['id'] + "/sphere_marker"
+                m_pub = rospy.Publisher(str_name, Marker, queue_size=10)
+
+                m_pub.publish(marker)        
 
 def main(args):
   rospy.init_node('ips', anonymous=True)

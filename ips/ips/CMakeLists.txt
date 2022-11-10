@@ -6,6 +6,20 @@ project(ips)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  std_msgs
+  geometry_msgs
+  message_generation
+)
+
+add_message_files(
+  FILES
+  Tag.msg
+)
+
+generate_messages(
+  DEPENDENCIES
+  std_msgs
+  geometry_msgs
 )
 
 catkin_package(
@@ -13,6 +27,7 @@ catkin_package(
 #  LIBRARIES ips
 #  CATKIN_DEPENDS rospy
 #  DEPENDS system_lib
+  CATKIN_DEPENDS message_runtime
 )
 
 catkin_install_python(PROGRAMS scripts/ips_node.py scripts/pose_estimator_node.py

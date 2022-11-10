@@ -1,11 +1,19 @@
 <launch>
 
-    <arg name="dual_tag_left" default="/dwm/node/8813" />
-    <arg name="dual_tag_right" default="/dwm/node/5088" />
+    <arg name="tag_1" default="/dwm/node/ce38" />
+    <arg name="tag_2" default="" />
+    <arg name="tag_3" default="/dwm/node/c092" />
+    <arg name="tag_4" default="" />
+    <!--arg name="tag_1" default="/dwm/node/ce38" /-->
+    <!--arg name="tag_2" default="/dwm/node/c51e" /-->
+    <!--arg name="tag_3" default="/dwm/node/c092" /-->
+    <!--arg name="tag_4" default="/dwm/node/5208" /-->
 
     <node name="pose_estimator_node" pkg="ips" type="pose_estimator_node.py" output="screen" clear_params="true">
-        <param name="dual_tag_left" value="$(arg dual_tag_left)" /> 
-        <param name="dual_tag_right" value="$(arg dual_tag_right)" /> 
+        <param name="tag_1" value="$(arg tag_1)" /> 
+        <param name="tag_2" value="$(arg tag_2)" /> 
+        <param name="tag_3" value="$(arg tag_3)" /> 
+        <param name="tag_4" value="$(arg tag_4)" /> 
     </node>
 
 </launch>

@@ -21,7 +21,7 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     pip install paho-mqtt"
 
-RUN echo "build for no cache."
+RUN echo "build for no cache_a"
 
 # Install ips package
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
