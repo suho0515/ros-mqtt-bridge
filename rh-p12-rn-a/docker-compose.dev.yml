@@ -1,0 +1,58 @@
+version: '2.2'
+
+# networks:
+#   ros:
+#     driver: bridge
+
+services:
+  ros-master:
+    image: ros:kinetic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    # networks:
+    #   - ros
+    # environment:
+    #   - "ROS_MASTER_URI=http://ros-master:11311"
+    #   - "ROS_HOSTNAME=ros-master"
+    network_mode: "host"
+    restart: always
+
+  # dxl-ros-driver:
+  #   image: aictrobotics/rh-p12-rn:latest
+  #   container_name: dxl-ros-driver
+  #   depends_on:
+  #     - ros-master
+  #   # networks:
+  #   #   - ros
+  #   environment:
+  #   #   - "ROS_MASTER_URI=http://ros-master:11311"
+  #   #   - "ROS_HOSTNAME=ocr-node"
+  #     - "DISPLAY=unix$DISPLAY" 
+  #   network_mode: "host"
+  #   volumes:
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw 
+  #     - ~/github/dynamixel:/root/catkin_ws/src/dynamixel
+  #   command: >      
+  #     bash -c "source ~/catkin_ws/devel/setup.bash &&
+  #     roslaunch dynamixel_workbench_controllers dynamixel_controllers_for_modee.launch"
+  #   privileged: true
+  #   restart: always
+
+  dev-container:
+    image: aictrobotics/rh-p12-rn-a:latest
+    container_name: dev-container
+    # networks:
+    #   - ros
+    environment:
+      # - "ROS_MASTER_URI=http://ros-master:11311"
+      # - "ROS_HOSTNAME=ocr-dev-container"
+      - "DISPLAY=unix$DISPLAY" 
+    network_mode: "host"
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw 
+      # - /home/aict/github/pcp:/root/catkin_ws/src/pcp
+    command: tail -F anything
+    privileged: true
+    restart: always
