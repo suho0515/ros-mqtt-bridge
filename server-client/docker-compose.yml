@@ -1,8 +1,16 @@
 version: '2.2'
 
-# networks:
-#   ros:
-#     driver: bridge
+networks:
+  pcp-macvlan-network:
+    name: pcp-macvlan-network
+    driver: macvlan
+    driver_opts:
+      parent: enp89s0
+    ipam:
+      config:
+        - subnet: "10.42.0.0/24"
+          # ip_range: "192.168.0.64/26"
+          gateway: "10.42.0.1"
 
 services:
   # ros-master:
@@ -20,18 +28,19 @@ services:
   dev-container:
     image: aictrobotics/server-client:latest
     container_name: dev-container
-    # networks:
-    #   - ros
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 10.42.0.2
     environment:
-      # - "ROS_MASTER_URI=http://ros-master:11311"
-      # - "ROS_HOSTNAME=ocr-dev-container"
+      - "ROS_MASTER_URI=http://10.42.0.2:11311"
+      - "ROS_HOSTNAME=10.42.0.2"
       - "DISPLAY=unix$DISPLAY" 
-    network_mode: "host"
-    # devices:
-    #   - /dev/ttyACM0:/dev/ttyACM0
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw 
       - /home/aict/github/pcp:/root/catkin_ws/src/pcp
     command: tail -F anything
     privileged: true
     restart: always
+    # network_mode: "host"
+    # devices:
+    #   - /dev/ttyACM0:/dev/ttyACM0

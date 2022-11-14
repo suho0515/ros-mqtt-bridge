@@ -16,6 +16,10 @@ RUN /bin/bash -c "apt-get update &&\
 # Install git
 RUN /bin/bash -c "apt-get install -y git"
 
+# Install nano & gedit
+RUN /bin/bash -c "apt-get install -y nano &&\
+                apt-get install -y gedit"
+
 # Install Python pip
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     apt-get install -y python-pip"
