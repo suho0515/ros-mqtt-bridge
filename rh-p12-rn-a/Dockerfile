@@ -13,6 +13,8 @@ RUN /bin/bash -c "apt-get update &&\
 RUN /bin/bash -c "source /opt/ros/kinetic/setup.bash &&\
     apt-get install -y python-pip"
 
+RUN echo "fast update without cache 20221122"
+
 # Install Dynamixel Workbench Packages
 RUN /bin/bash -c "source ~/catkin_ws/devel/setup.bash &&\
     cd ~/catkin_ws/src &&\
