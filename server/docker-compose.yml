@@ -1,0 +1,43 @@
+version: '2.2'
+
+networks:
+  pcp-macvlan-network:
+    name: pcp-macvlan-network
+    driver: macvlan
+    driver_opts:
+      parent: eno1
+    ipam:
+      config:
+        - subnet: "192.168.1.0/24"
+          # ip_range: "192.168.0.64/26"
+          gateway: "192.168.1.1"
+
+services:
+  rosbridge-suite:
+    image: aictrobotics/rosbridge-suite:latest
+    container_name: rosbridge-suite
+    command: >
+      bash -c "roslaunch rosbridge_server rosbridge_websocket.launch respawn:="true""
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.1.2
+    ports:
+      - "9090:9090"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.1.9:11311"
+      - "ROS_HOSTNAME=192.168.1.2"
+    restart: always
+
+  foxglove-studio:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: foxglove-studio
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.1.3
+    environment:
+      - "ROS_MASTER_URI=http://192.168.1.9:11311"
+      - "ROS_HOSTNAME=192.168.1.3"
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always

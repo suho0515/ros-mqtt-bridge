@@ -1,0 +1,96 @@
+version: '2.2'
+
+networks:
+  pcp-macvlan-network:
+    name: pcp-macvlan-network
+    driver: macvlan
+    driver_opts:
+      parent: eno1
+    ipam:
+      config:
+        - subnet: "192.168.1.0/24"
+          # ip_range: "192.168.0.64/26"
+          gateway: "192.168.1.1"
+
+services:
+
+  # ips:
+  #   image: aictrobotics/ips:latest
+  #   container_name: ips
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.3
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch ips ips.launch ip_address:="192.168.1.59" port:=1883"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.3"
+  #   privileged: true
+  #   restart: always
+
+  # rosbridge-suite:
+  #   image: aictrobotics/rosbridge-suite:latest
+  #   container_name: rosbridge-suite
+  #   command: >
+  #     bash -c "roslaunch rosbridge_server rosbridge_websocket.launch respawn:="true""
+  #   networks:
+  #     pcp-macvlan-network:
+  #       ipv4_address: 192.168.1.2
+  #   ports:
+  #     - "9090:9090"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.1.190:11311"
+  #     - "ROS_HOSTNAME=192.168.1.2"
+  #   restart: always
+
+  foxglove-studio:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: foxglove-studio
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.1.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.1.190:11311"
+      - "ROS_HOSTNAME=192.168.1.2"
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always
+
+  # pose-estimator:
+  #   image: aictrobotics/ips:latest
+  #   container_name: pose-estimator
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.6
+  #   command: >
+  #     bash -c "tail -F anything"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.6"
+  #   volumes: 
+  #     - ~/github/pcp/ips:/root/catkin_ws/src/ips
+  #   privileged: true
+  #   restart: always
+
+  # dev-container:
+  #   image: aictrobotics/ips:latest
+  #   container_name: dev-container
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-bridge-network:
+  #       ipv4_address: 192.168.56.7
+  #   command: >
+  #     bash -c "tail -F anything"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.56.2:11311"
+  #     - "ROS_HOSTNAME=192.168.56.7"
+  #   volumes: 
+  #     - ~/github/pcp/ips:/root/catkin_ws/src/ips
+  #   privileged: true
+  #   restart: always

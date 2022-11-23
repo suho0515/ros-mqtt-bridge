@@ -1,0 +1,48 @@
+version: '2.2'
+
+networks:
+  pcp-macvlan-network:
+    name: pcp-macvlan-network
+    driver: macvlan
+    driver_opts:
+      parent: eno1
+    ipam:
+      config:
+        - subnet: "192.168.1.0/24"
+          # ip_range: "192.168.0.64/26"
+          gateway: "192.168.1.1"
+
+services:
+  # ros-master:
+  #   image: ros:melodic-ros-core
+  #   container_name: ros-master
+  #   command: stdbuf -o L roscore
+  #   # networks:
+  #   #   - ros
+  #   # environment:
+  #   #   - "ROS_MASTER_URI=http://ros-master:11311"
+  #   #   - "ROS_HOSTNAME=ros-master"
+  #   network_mode: "host"
+  #   restart: always
+
+  dev-container:
+    image: aictrobotics/server-client:latest
+    container_name: dev-container
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.1.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.1.190:11311"
+      - "ROS_HOSTNAME=192.168.1.2"
+      - "DISPLAY=unix$DISPLAY" 
+    # ports:
+    #   - 192.168.1.190:11311:11311
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw 
+      - /home/aict/github/pcp:/root/catkin_ws/src/pcp
+    command: tail -F anything
+    privileged: true
+    restart: always
+    # network_mode: "host"
+    # devices:
+    #   - /dev/ttyACM0:/dev/ttyACM0
