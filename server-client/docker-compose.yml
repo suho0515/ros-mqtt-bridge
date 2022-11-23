@@ -32,7 +32,7 @@ services:
       pcp-macvlan-network:
         ipv4_address: 10.42.0.2
     environment:
-      - "ROS_MASTER_URI=http://10.42.0.2:11311"
+      - "ROS_MASTER_URI=http://10.42.0.1:11311"
       - "ROS_HOSTNAME=10.42.0.2"
       - "DISPLAY=unix$DISPLAY" 
     volumes:
