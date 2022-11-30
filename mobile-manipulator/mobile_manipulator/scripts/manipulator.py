@@ -165,7 +165,7 @@ class MANIPULATOR:
         self.pub = rospy.Publisher('/joint_group_vel_controller/command', Float64MultiArray, queue_size=10)
 
         # Subscribe TF Information of the End-Effector
-        self.tf_sub = rospy.Subscriber("/tf", TFMessage, self.tf_callback)
+        # self.tf_sub = rospy.Subscriber("/tf", TFMessage, self.tf_callback)
         
 
 
@@ -178,16 +178,17 @@ class MANIPULATOR:
         # Load ros.urp program file
         resp = self.s_loadProgram("/ros.urp")
         rospy.loginfo("try to load program.\n result: %s",resp)
-        
-        # Try to play external control file
-        rospy.wait_for_service('/ur_hardware_interface/dashboard/play')
-        resp = self.s_playProgram()
-        rospy.loginfo("try to play external control.\n result: %s",resp)
-        rospy.sleep(0.5)
 
         self.set_power('OFF')
         rospy.sleep(2.0)
         self.set_power('ON')
+
+        # Try to play external control file
+        # When play external control, Robot should be turned on and running
+        rospy.wait_for_service('/ur_hardware_interface/dashboard/play')
+        resp = self.s_playProgram()
+        rospy.loginfo("try to play external control.\n result: %s",resp)
+        rospy.sleep(0.5)
 
         pass
 
@@ -358,10 +359,10 @@ class MANIPULATOR:
             rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
 
     # def tf_callback(self, tf_msg):
-    #     # print(tf_msg.transforms[0].transform)
-    #     p = tf_msg.transforms[0].transform.translation
-    #     x = np.array([p.x,p.y,p.z])
-    #     v = np.linalg.norm(x)
-    #     print(v)
-    #     if v > 0.6:
-    #         self.stop()
+        # print(tf_msg.transforms[0].transform)
+        # p = tf_msg.transforms[0].transform.translation
+        # x = np.array([p.x,p.y,p.z])
+        # v = np.linalg.norm(x)
+        # # print(v)
+        # if v > 0.6:
+        #     self.stop()

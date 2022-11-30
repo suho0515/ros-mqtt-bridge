@@ -1,34 +1,48 @@
 version: '2.2'
 
+# networks:
+#   ros:
+#     driver: bridge
 networks:
-  ros:
-    driver: bridge
+  pcp-macvlan-network:
+    name: pcp-macvlan-network
+    driver: macvlan
+    driver_opts:
+      parent: enp89s0
+    ipam:
+      config:
+        - subnet: "10.42.0.0/24"
+          # ip_range: "192.168.0.64/26"
+          gateway: "10.42.0.1"
 
 services:
-  ros-master:
-    image: ros:noetic-ros-core
-    container_name: ros-master
-    command: stdbuf -o L roscore
-    # networks:
-    #   - ros
-    # environment:
-    #   - "ROS_MASTER_URI=http://ros-master:11311"
-    #   - "ROS_HOSTNAME=ros-master"
-    network_mode: "host"
-    restart: always
+  # ros-master:
+  #   image: ros:noetic-ros-core
+  #   container_name: ros-master
+  #   command: stdbuf -o L roscore
+  #   # networks:
+  #   #   - ros
+  #   # environment:
+  #   #   - "ROS_MASTER_URI=http://ros-master:11311"
+  #   #   - "ROS_HOSTNAME=ros-master"
+  #   network_mode: "host"
+  #   restart: always
 
   cam-node:
     image: aictrobotics/modee:latest
     container_name: cam-node
-    depends_on:
-      - ros-master
-    # networks:
-    #   - ros
+    # depends_on:
+    #   - ros-master
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 10.42.0.2
     environment:
-      # - "ROS_MASTER_URI=http://ros-master:11311"
-      # - "ROS_HOSTNAME=cam_node"
+      - "ROS_MASTER_URI=http://192.168.1.9:11311"
+      - "ROS_HOSTNAME=10.42.0.2"
       - "DISPLAY=unix$DISPLAY"
-    network_mode: "host"
+    # network_mode: "host"
+    ports:
+      - "192.168.1.9:11311:11311"
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command: >      
@@ -155,19 +169,19 @@ services:
   #   privileged: true
   #   restart: always
 
-  dev-container:
-    image: aictrobotics/modee:latest
-    container_name: dev-container
-    # networks:
-    #   - ros
-    environment:
-      # - "ROS_MASTER_URI=http://ros-master:11311"
-      # - "ROS_HOSTNAME=dev-container"
-      - "DISPLAY=unix$DISPLAY" 
-    # # network_mode: "host"
-    volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw 
-      - /home/aict/github/pcp/modee:/root/catkin_ws/src/modee
-    command: tail -F anything
-    privileged: true
-    restart: always
+  # dev-container:
+  #   image: aictrobotics/modee:latest
+  #   container_name: dev-container
+  #   # networks:
+  #   #   - ros
+  #   environment:
+  #     # - "ROS_MASTER_URI=http://ros-master:11311"
+  #     # - "ROS_HOSTNAME=dev-container"
+  #     - "DISPLAY=unix$DISPLAY" 
+  #   # # network_mode: "host"
+  #   volumes:
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw 
+  #     - /home/aict/github/pcp/modee:/root/catkin_ws/src/modee
+  #   command: tail -F anything
+  #   privileged: true
+  #   restart: always

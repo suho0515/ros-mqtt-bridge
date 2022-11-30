@@ -1,0 +1,190 @@
+version: '2.2'
+
+networks:
+  pcp-macvlan-network:
+    name: pcp-macvlan-network
+    driver: macvlan
+    driver_opts:
+      parent: enp89s0
+    ipam:
+      config:
+        - subnet: "192.168.12.0/24"
+          # ip_range: "192.168.0.64/26"
+          gateway: "192.168.12.1"
+
+services:
+  ros-master:
+    image: ros:melodic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.2
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.2"
+    # ports:
+    #   - "192.168.12.250:11311:11311"      
+    privileged: true
+    restart: always
+
+  rosbridge-suite:
+    image: aictrobotics/rosbridge-suite:latest
+    container_name: rosbridge-suite
+    command: >
+      bash -c "roslaunch rosbridge_server rosbridge_websocket.launch"
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.3
+    # ports:
+    #   - "9090:9090"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.3"
+    privileged: true      
+    restart: always
+
+  foxglove-studio:
+    image: ghcr.io/foxglove/studio:latest
+    container_name: foxglove-studio
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.4
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.4"
+    ports:
+      - "8080:8080"
+    privileged: true
+    restart: always
+
+  # joy-driver:
+  #   image: aictrobotics/mobile-manipulator:latest
+  #   container_name: joy-driver
+  #   depends_on:
+  #     - ros-master
+  #   networks:
+  #     pcp-macvlan-network:
+  #       ipv4_address: 192.168.12.5
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch joy dual_joy.launch"
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.12.2:11311"
+  #     - "ROS_HOSTNAME=192.168.12.5"
+  #   privileged: true
+  #   restart: always
+
+
+  joy-to-mm:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: joy-to-mm
+    depends_on:
+      - ros-master
+    #   - joy-driver
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.6
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && rosrun joy_to_mm joy_to_mm_node.py"
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.6"
+    privileged: true
+    restart: always
+
+  manipulator-driver:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: manipulator-driver
+    depends_on:
+      - ros-master
+    networks: 
+      pcp-macvlan-network: 
+        ipv4_address: 192.168.12.7
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.7"
+    command: >      
+      bash -c "source ~/catkin_ws/devel/setup.bash &&
+              roslaunch ur_robot_driver ur3e_bringup.launch robot_ip:=192.168.12.252 controllers:="forward_cartesian_traj_controller joint_group_vel_controller joint_state_controller" stopped_controllers:="pos_joint_traj_controller""
+    privileged: true
+    restart: always
+
+  mobile-base-driver:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: mobile-base-driver
+    depends_on:
+      - ros-master
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.8
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.8"
+      - "DISPLAY=unix$DISPLAY"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_driver mir.launch"
+    privileged: true
+    restart: always
+
+  mobile-manipulator-driver:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: mobile-manipulator-driver
+    depends_on:
+      - ros-master
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.9
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.9"
+      - "DISPLAY=unix$DISPLAY"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "source ~/catkin_ws/devel/setup.bash && roslaunch mir_driver mir.launch"
+    privileged: true
+    restart: always
+
+  # rviz:
+  #   image: aictrobotics/mobile-manipulator:latest
+  #   container_name: rviz
+  #   # depends_on:
+  #   #   - ros-master
+  #   networks:
+  #     pcp-macvlan-network:
+  #       ipv4_address: 10.42.0.6
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.1.9:11311"
+  #     - "ROS_HOSTNAME=10.42.0.6"
+  #     - "DISPLAY=unix$DISPLAY"
+  #   volumes: 
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #   command: >
+  #     bash -c "source ~/catkin_ws/devel/setup.bash && rviz -d ~/catkin_ws/src/mir_robot/mir_navigation/rviz/navigation.rviz"
+  #   privileged: true
+  #   restart: always
+
+  # dev-container:
+  #   image: aictrobotics/mobile-manipulator:latest
+  #   container_name: dev-container
+  #   # depends_on:
+  #   #   - ros-master
+  #   networks:
+  #     pcp-macvlan-network:
+  #       ipv4_address: 192.168.12.10
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.12.2:11311"
+  #     - "ROS_HOSTNAME=192.168.12.10"
+  #     - "DISPLAY=unix$DISPLAY"
+  #   # ports:
+  #   #   - "9090:9090"
+  #   volumes: 
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #     - /home/aict/github/pcp/mobile-manipulator:/root/catkin_ws/src/mobile-manipulator
+  #     - /home/aict/github/universal_robot:/root/catkin_ws/src/fmauch_universal_robot
+  #   command: >
+  #     bash -c "tail -F anything"
+  #   privileged: true
+  #   restart: always

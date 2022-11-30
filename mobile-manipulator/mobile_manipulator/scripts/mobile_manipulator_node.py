@@ -10,4 +10,5 @@ if __name__ == '__main__':
     try:
         mobile_manipulator = MOBILE_MANIPULATOR()
         rospy.spin()
+        
     except rospy.ROSInterruptException: pass

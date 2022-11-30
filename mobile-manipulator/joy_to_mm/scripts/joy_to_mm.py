@@ -32,11 +32,13 @@ class JOY_TO_MM:
 
     def left_joy_callback(self, left_data):
         self.proc_left_joy(left_data)
+        rospy.loginfo(left_data)
         pass
         
 
     def right_joy_callback(self, right_data):
         self.proc_right_joy(right_data)
+        rospy.loginfo(right_data)
         pass
 
     def proc_left_joy(self, left_data):

@@ -27,6 +27,7 @@ class MOBILE_MANIPULATOR:
         if self.mb_param == True:
             self.mb = MOBILE_BASE()
         
+
         # get an instance of RosPack with the default search paths
         self.rospack = rospkg.RosPack()
         # list all packages, equivalent to rospack list
@@ -65,7 +66,8 @@ class MOBILE_MANIPULATOR:
         pass    
 
     def control_mode_callback(self, control_mode):
-        #print(control_mode)
+        rospy.loginfo("control_mode command is : %s", control_mode)
+        print(control_mode)
         self.stop()
         self.set_control_mode(control_mode.data)
         pass
@@ -114,17 +116,21 @@ class MOBILE_MANIPULATOR:
         pass
 
     def manual_callback(self, msg):
+        rospy.loginfo("manual command is received by operator.")
         self.manual_control(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4], msg.data[5], msg.data[6], msg.data[7], msg.data[8])
         pass
 
     def manual_control(self, trigger, mb_trans, mb_orient, mp_v1, mp_v2, mp_v3, mp_v4, mp_v5, mp_v6):
+        print(self.control_mode == 'MANUAL')
         if (self.control_mode == 'MANUAL'):
             if trigger:
                 if self.mb_param == True:
-                    self.mb.velocity_control(mb_trans, mb_orient)
+                    self.mb.velocity_control(mb_trans, mb_orient)                    
             else:
+                print(self.mp_param == True)
                 if self.mp_param == True:
                     self.mp.velocity_control(mp_v1, mp_v2, mp_v3, mp_v4, mp_v5, mp_v6)
+                    rospy.loginfo("manipulator velocity control command is sent by mobile manipulator.")
         pass
 
     def stop(self, ):
