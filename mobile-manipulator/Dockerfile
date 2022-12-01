@@ -84,7 +84,7 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     source devel/setup.bash"
 
 # for fast build update
-CMD ["echo", "update mobile manipulator_20221027"]
+CMD ["echo", "update mobile manipulator_20221130"]
 
 # Mobile Manipulator Package
 # ========================================
