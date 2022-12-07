@@ -47,6 +47,9 @@ from scipy.spatial.transform import Rotation
 
 import numpy as np
 
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+import math
+
 # If your robot description is created with a tf_prefix, those would have to be adapted
 JOINT_NAMES = [
     "shoulder_pan_joint",
@@ -165,9 +168,7 @@ class MANIPULATOR:
         self.pub = rospy.Publisher('/joint_group_vel_controller/command', Float64MultiArray, queue_size=10)
 
         # Subscribe TF Information of the End-Effector
-        # self.tf_sub = rospy.Subscriber("/tf", TFMessage, self.tf_callback)
-        
-
+        self.tf_sub = rospy.Subscriber("/tf", TFMessage, self.tf_callback)
 
         # Running up the Manipulator
         # ========================================
@@ -316,53 +317,22 @@ class MANIPULATOR:
         
             goal.goal_time_tolerance = rospy.Duration(0.6)
             
-            self.cartesian_passthrough_trajectory_client.send_goal(goal)
-            self.cartesian_passthrough_trajectory_client.wait_for_result()
-            result = self.cartesian_passthrough_trajectory_client.get_result()
+        self.cartesian_passthrough_trajectory_client.send_goal(goal)
+        self.cartesian_passthrough_trajectory_client.wait_for_result()
+        result = self.cartesian_passthrough_trajectory_client.get_result()
 
-            rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
+        rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
 
-    # Function for Control UR Robot in the Cartesian Coordinate
-    def value_list_control(self, pose_list):     
-        print(pose_list)
-
-        for l in pose_list:
-            goal = FollowCartesianTrajectoryGoal()
-
-            point = CartesianTrajectoryPoint()
-            point.pose.position.x = l[0]
-            point.pose.position.y = l[1]
-            point.pose.position.z = l[2]
-
-            rot = Rotation.from_euler('xyz', [l[3], l[4], l[5]], degrees=True)
-            rot_quat = rot.as_quat()
-            #print(rot_quat)
-
-            point.pose.orientation.x = -rot_quat[0]
-            point.pose.orientation.y = -rot_quat[1]
-            point.pose.orientation.z = -rot_quat[2]
-            point.pose.orientation.w = -rot_quat[3]
-            #print(point.pose)
-
-            time_from_start = l[6]
-
-            point.time_from_start = rospy.Duration(time_from_start)
-            goal.trajectory.points.append(point)
-            print(str(l) +' is appended')
-        
-            goal.goal_time_tolerance = rospy.Duration(0.6)
-            
-            self.cartesian_passthrough_trajectory_client.send_goal(goal)
-            self.cartesian_passthrough_trajectory_client.wait_for_result()
-            result = self.cartesian_passthrough_trajectory_client.get_result()
-
-            rospy.loginfo("Received result SUCCESSFUL.\n result: %s",result)
-
-    # def tf_callback(self, tf_msg):
+    def tf_callback(self, tf_msg):
         # print(tf_msg.transforms[0].transform)
+        # quat = tf_msg.transforms[0].transform.rotation
+        # quat_list = [quat.x, quat.y, quat.z, quat.w]
+        # (roll, pitch, yaw) = euler_from_quaternion (quat_list)
+        # print(math.degrees(roll), math.degrees(pitch), math.degrees(yaw))
         # p = tf_msg.transforms[0].transform.translation
         # x = np.array([p.x,p.y,p.z])
         # v = np.linalg.norm(x)
         # # print(v)
         # if v > 0.6:
         #     self.stop()
+        pass

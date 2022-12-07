@@ -129,26 +129,26 @@ services:
     restart: always
 
   # 192.168.12.9 is not working (Not sure why)
-  mobile-manipulator-driver:
-    image: aictrobotics/mobile-manipulator:latest
-    container_name: mobile-manipulator-driver
-    depends_on:
-      - ros-master
-      - manipulator-driver
-      - mobile-base-driver
-    networks:
-      pcp-macvlan-network:
-        ipv4_address: 192.168.12.10
-    environment:
-      - "ROS_MASTER_URI=http://192.168.12.2:11311"
-      - "ROS_HOSTNAME=192.168.12.10"
-      - "DISPLAY=unix$DISPLAY"
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-    command: >
-      bash -c "sleep 30 && source ~/catkin_ws/devel/setup.bash && roslaunch mobile_manipulator mobile_manipulator.launch output:="screen""
-    privileged: true
-    restart: always
+  # mobile-manipulator-driver:
+  #   image: aictrobotics/mobile-manipulator:latest
+  #   container_name: mobile-manipulator-driver
+  #   depends_on:
+  #     - ros-master
+  #     - manipulator-driver
+  #     - mobile-base-driver
+  #   networks:
+  #     pcp-macvlan-network:
+  #       ipv4_address: 192.168.12.10
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.12.2:11311"
+  #     - "ROS_HOSTNAME=192.168.12.10"
+  #     - "DISPLAY=unix$DISPLAY"
+  #   volumes: 
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #   command: >
+  #     bash -c "sleep 30 && source ~/catkin_ws/devel/setup.bash && roslaunch mobile_manipulator mobile_manipulator.launch output:="screen""
+  #   privileged: true
+  #   restart: always
 
   # rviz:
   #   image: aictrobotics/mobile-manipulator:latest
@@ -169,25 +169,25 @@ services:
   #   privileged: true
   #   restart: always
 
-  # dev-container:
-  #   image: aictrobotics/mobile-manipulator:latest
-  #   container_name: dev-container
-  #   # depends_on:
-  #   #   - ros-master
-  #   networks:
-  #     pcp-macvlan-network:
-  #       ipv4_address: 192.168.12.10
-  #   environment:
-  #     - "ROS_MASTER_URI=http://192.168.12.2:11311"
-  #     - "ROS_HOSTNAME=192.168.12.10"
-  #     - "DISPLAY=unix$DISPLAY"
-  #   # ports:
-  #   #   - "9090:9090"
-  #   volumes: 
-  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
-  #     - /home/aict/github/pcp/mobile-manipulator:/root/catkin_ws/src/mobile-manipulator
-  #     - /home/aict/github/universal_robot:/root/catkin_ws/src/fmauch_universal_robot
-  #   command: >
-  #     bash -c "tail -F anything"
-  #   privileged: true
-  #   restart: always
+  dev-container:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: dev-container
+    # depends_on:
+    #   - ros-master
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.10
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.10"
+      - "DISPLAY=unix$DISPLAY"
+    # ports:
+    #   - "9090:9090"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - /home/aict/github/pcp/mobile-manipulator:/root/catkin_ws/src/mobile-manipulator
+      - /home/aict/github/universal_robot:/root/catkin_ws/src/fmauch_universal_robot
+    command: >
+      bash -c "tail -F anything"
+    privileged: true
+    restart: always

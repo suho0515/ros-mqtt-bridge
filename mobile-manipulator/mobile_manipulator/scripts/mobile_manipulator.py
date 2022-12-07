@@ -73,6 +73,7 @@ class MOBILE_MANIPULATOR:
         pass
 
     def autoset_callback(self, autoset):
+        self.task_db = self.load_db(self.path)
         if autoset.data == "AUTOSET1":
             self.add_task_to_list(self.task_db['task_list']['test_01'])
         elif autoset.data == "AUTOSET2":

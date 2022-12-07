@@ -15,8 +15,9 @@ class MOBILE_BASE:
         self.mb_vel_msg = Twist()
 
         self.client = actionlib.SimpleActionClient('move_base',MoveBaseAction)
-        self.client.wait_for_server()
-        
+        result = self.client.wait_for_server()  
+        rospy.loginfo("result of simple action client connection with server: %s", result)
+    
     def stop(self, ):
         pass
 
