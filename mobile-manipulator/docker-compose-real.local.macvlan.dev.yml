@@ -166,11 +166,11 @@ services:
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw 
       # - ~/github/ocr:/root/catkin_ws/src/ocr
-    # command: >      
-    #   bash -c "source ~/catkin_ws/devel/setup.bash &&
-    #   roslaunch ocr ocr.launch multiply_value:="1.0" big_ranged_h_low:="0" big_ranged_s_low:="100" big_ranged_v_low:="0" big_ranged_h_high:="50" big_ranged_s_high:="255" big_ranged_v_high:="255"  each_roi_3_x:="55" each_roi_3_y:="190" each_roi_3_w:="40" each_roi_3_h:="40" each_bin_1:="140" each_bin_2:="120" each_bin_3:="120" debug:="False""
-    command: >
-      bash -c "tail -F anything"
+    command: >      
+      bash -c "source ~/catkin_ws/devel/setup.bash &&
+      roslaunch ocr ocr.launch multiply_value:="1.0" big_ranged_h_low:="0" big_ranged_s_low:="100" big_ranged_v_low:="0" big_ranged_h_high:="50" big_ranged_s_high:="255" big_ranged_v_high:="255"  each_roi_3_x:="55" each_roi_3_y:="190" each_roi_3_w:="40" each_roi_3_h:="40" each_bin_1:="140" each_bin_2:="120" each_bin_3:="120" debug:="False""
+    # command: >
+    #   bash -c "tail -F anything"
     privileged: true
     restart: always
 
@@ -196,26 +196,26 @@ services:
   #   restart: always
 
   # 192.168.12.9 is not working (Not sure why)
-  # mobile-manipulator-driver:
-  #   image: aictrobotics/mobile-manipulator:latest
-  #   container_name: mobile-manipulator-driver
-  #   depends_on:
-  #     - ros-master
-  #     - manipulator-driver
-  #     - mobile-base-driver
-  #   networks:
-  #     pcp-macvlan-network:
-  #       ipv4_address: 192.168.12.10
-  #   environment:
-  #     - "ROS_MASTER_URI=http://192.168.12.2:11311"
-  #     - "ROS_HOSTNAME=192.168.12.10"
-  #     - "DISPLAY=unix$DISPLAY"
-  #   volumes: 
-  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
-  #   command: >
-  #     bash -c "sleep 30 && source ~/catkin_ws/devel/setup.bash && roslaunch mobile_manipulator mobile_manipulator.launch output:="screen""
-  #   privileged: true
-  #   restart: always
+  mobile-manipulator-driver:
+    image: aictrobotics/mobile-manipulator:latest
+    container_name: mobile-manipulator-driver
+    depends_on:
+      - ros-master
+      - manipulator-driver
+      - mobile-base-driver
+    networks:
+      pcp-macvlan-network:
+        ipv4_address: 192.168.12.12
+    environment:
+      - "ROS_MASTER_URI=http://192.168.12.2:11311"
+      - "ROS_HOSTNAME=192.168.12.12"
+      - "DISPLAY=unix$DISPLAY"
+    volumes: 
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    command: >
+      bash -c "sleep 30 && source ~/catkin_ws/devel/setup.bash && roslaunch mobile_manipulator mobile_manipulator.launch output:="screen""
+    privileged: true
+    restart: always
 
   # rviz:
   #   image: aictrobotics/mobile-manipulator:latest
@@ -236,27 +236,27 @@ services:
   #   privileged: true
   #   restart: always
 
-  mm-dev-container:
-    image: aictrobotics/mobile-manipulator:latest
-    container_name: mm-dev-container
-    # depends_on:
-    #   - ros-master
-    networks:
-      pcp-macvlan-network:
-        ipv4_address: 192.168.12.100
-    environment:
-      - "ROS_MASTER_URI=http://192.168.12.2:11311"
-      - "ROS_HOSTNAME=192.168.12.100"
-      - "DISPLAY=unix$DISPLAY"
-    volumes: 
-      - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - /home/aict/github/pcp/mobile-manipulator:/root/catkin_ws/src/mobile-manipulator
-      - /home/aict/github/pcp/modee:/root/catkin_ws/src/modee
-      # - /home/aict/github/universal_robot:/root/catkin_ws/src/fmauch_universal_robot
-    command: >
-      bash -c "tail -F anything"
-    privileged: true
-    restart: always
+  # mm-dev-container:
+  #   image: aictrobotics/mobile-manipulator:latest
+  #   container_name: mm-dev-container
+  #   # depends_on:
+  #   #   - ros-master
+  #   networks:
+  #     pcp-macvlan-network:
+  #       ipv4_address: 192.168.12.100
+  #   environment:
+  #     - "ROS_MASTER_URI=http://192.168.12.2:11311"
+  #     - "ROS_HOSTNAME=192.168.12.100"
+  #     - "DISPLAY=unix$DISPLAY"
+  #   volumes: 
+  #     - /tmp/.X11-unix:/tmp/.X11-unix:rw
+  #     - /home/aict/github/pcp/mobile-manipulator:/root/catkin_ws/src/mobile-manipulator
+  #     - /home/aict/github/pcp/modee:/root/catkin_ws/src/modee
+  #     # - /home/aict/github/universal_robot:/root/catkin_ws/src/fmauch_universal_robot
+  #   command: >
+  #     bash -c "tail -F anything"
+  #   privileged: true
+  #   restart: always
 
   # modee-dev-container:
   #   image: aictrobotics/modee:latest
