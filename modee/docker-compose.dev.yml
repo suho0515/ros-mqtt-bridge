@@ -16,17 +16,17 @@ networks:
           gateway: "10.42.0.1"
 
 services:
-  # ros-master:
-  #   image: ros:noetic-ros-core
-  #   container_name: ros-master
-  #   command: stdbuf -o L roscore
-  #   # networks:
-  #   #   - ros
-  #   # environment:
-  #   #   - "ROS_MASTER_URI=http://ros-master:11311"
-  #   #   - "ROS_HOSTNAME=ros-master"
-  #   network_mode: "host"
-  #   restart: always
+  ros-master:
+    image: ros:noetic-ros-core
+    container_name: ros-master
+    command: stdbuf -o L roscore
+    # networks:
+    #   - ros
+    # environment:
+    #   - "ROS_MASTER_URI=http://ros-master:11311"
+    #   - "ROS_HOSTNAME=ros-master"
+    network_mode: "host"
+    restart: always
 
   cam-node:
     image: aictrobotics/modee:latest
@@ -41,8 +41,8 @@ services:
       - "ROS_HOSTNAME=10.42.0.2"
       - "DISPLAY=unix$DISPLAY"
     # network_mode: "host"
-    ports:
-      - "192.168.1.9:11311:11311"
+    # ports:
+    #   - "192.168.1.9:11311:11311"
     volumes: 
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
     command: >      

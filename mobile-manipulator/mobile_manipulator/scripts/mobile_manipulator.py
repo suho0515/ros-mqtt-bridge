@@ -5,13 +5,13 @@ import rospkg
 
 from manipulator import MANIPULATOR
 from mobile_base import MOBILE_BASE
+from modee import MODEE
 
 from std_msgs.msg import String
 from std_msgs.msg import Float64MultiArray
 
 import json
 from threading import Thread, Event
-
 
 class MOBILE_MANIPULATOR:
     def __init__(self):
@@ -20,12 +20,16 @@ class MOBILE_MANIPULATOR:
 
         self.mp_param = rospy.get_param('/mobile_manipulator/mp')
         self.mb_param = rospy.get_param('/mobile_manipulator/mb')
+        self.modee_param = rospy.get_param('/mobile_manipulator/modee')
+
         # print(self.mp_param)
         # print(self.mb_param)
         if self.mp_param == True:
             self.mp = MANIPULATOR()
         if self.mb_param == True:
             self.mb = MOBILE_BASE()
+        if self.modee_param == True:
+            self.modee = MODEE()
         
 
         # get an instance of RosPack with the default search paths
@@ -157,6 +161,9 @@ class MOBILE_MANIPULATOR:
             elif key == "mb":
                 value_dict = {'key': 'mb', 'val': self.task_db[key][task]}
                 self.value_list.append(value_dict)
+            elif key == "modee":
+                value_dict = {'key': 'modee', 'val': self.task_db[key][task]}
+                self.value_list.append(value_dict)
 
     def proc_task_list(self):
         
@@ -178,6 +185,10 @@ class MOBILE_MANIPULATOR:
                 elif key == "mb":
                     if self.mb_param == True:
                         self.mb.value_control(val)
+                    del self.value_list[0]
+                elif key == "modee":
+                    if self.modee_param == True:
+                        self.modee.value_control(val)
                     del self.value_list[0]
                 # rospy.loginfo("value control [%s] is done", self.value_list[0])
             else:

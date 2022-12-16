@@ -107,14 +107,30 @@
         "pot_04": 
         [6.370, 14.3, 0.0, 0.0, 0.0, 180.0]
     },
+    "modee":
+    {
+        "gripping":
+        [1.0, 0.0],
+        "releasing":
+        [2.0, 0.0],
+        "feedback_control":
+        [3.0, 50.0],
+        "aspirating":
+        [4.0, 0.0],
+        "dispensing":
+        [5.0, 0.0],
+        "pumping":
+        [6.0, 0.0]
+    },
     "task_list":
     {
         "test_01":
         [
-            {"mp": "origin_to_right"},
-            {"mp": "right_to_port_to_right"},
-            {"mp": "right_to_origin"}
-            
+            {"modee": "gripping"},
+            {"modee": "feedback_control"},
+            {"modee": "aspirating"},
+            {"modee": "dispensing"},
+            {"modee": "pumping"}
         ],
         "test_02":
         [

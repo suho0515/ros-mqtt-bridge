@@ -83,11 +83,29 @@ RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     catkin_make -DCMAKE_BUILD_TYPE=RelWithDebugInfo &&\
     source devel/setup.bash"
 
-# for fast build update
-CMD ["echo", "update mobile manipulator_20221130"]
+# MODEE Driver
+# ========================================
+# Install python package for serial
+RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
+    pip install pyserial"
+
+# Install Dynamixel Workbench Packages
+RUN /bin/bash -c "source ~/catkin_ws/devel/setup.bash &&\
+    cd ~/catkin_ws/src &&\
+    git clone https://github.com/suho0515/dynamixel-workbench.git &&\
+    git clone https://github.com/ROBOTIS-GIT/dynamixel-workbench-msgs.git &&\
+    git clone https://github.com/ROBOTIS-GIT/DynamixelSDK.git &&\
+    cd ~/catkin_ws &&\
+    catkin_make &&\
+    source devel/setup.bash"
+
 
 # Mobile Manipulator Package
 # ========================================
+
+# for fast build update
+CMD ["echo", "update mobile manipulator_20221130"]
+
 RUN /bin/bash -c "source /opt/ros/melodic/setup.bash &&\
     git clone https://github.com/suho0515/pcp &&\
     cp -r /pcp/mobile-manipulator ~/catkin_ws/src &&\
